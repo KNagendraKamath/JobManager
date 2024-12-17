@@ -5,3 +5,5 @@
 /.vs
 /bin/Debug/net8.0
 /obj
+/Test/JobmanagerTest/bin/Debug/net8.0
+/Test/JobmanagerTest/obj
