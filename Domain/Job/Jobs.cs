@@ -3,7 +3,7 @@ using JobScheduler.Domain.Abstractions;
 
 namespace JobScheduler.Domain.Jobs;
 
-public class Job:Entity
+public class Jobs:Entity
 {
     public DateTime EffectiveDateTime { get; set; }
     public string? JobDescription { get; set; }
