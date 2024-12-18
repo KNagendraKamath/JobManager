@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Dapper;
 using Microsoft.Data.SqlClient;
 
-namespace JobScheduler;
+namespace JobScheduler.Infrastructure.Abstractions;
 
 public class JobDapper
 {
