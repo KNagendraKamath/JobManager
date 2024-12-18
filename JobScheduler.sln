@@ -3,12 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.10.35122.118
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JobScheduler", "JobScheduler.csproj", "{B475143D-454F-4B22-BE94-D6EC00901C82}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JobSchedulerConsole", "..\JobSchedulerConsole\JobSchedulerConsole.csproj", "{0AFD6D17-49AF-40F2-B821-400A162C784B}"
-	ProjectSection(ProjectDependencies) = postProject
-		{B475143D-454F-4B22-BE94-D6EC00901C82} = {B475143D-454F-4B22-BE94-D6EC00901C82}
-	EndProjectSection
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JobScheduler", "JobScheduler\JobScheduler.csproj", "{B475143D-454F-4B22-BE94-D6EC00901C82}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JobmanagerTest", "Test\JobmanagerTest\JobmanagerTest.csproj", "{B5FF45CF-D62F-4C42-BC3F-CB3D50AD5FA8}"
 EndProject
