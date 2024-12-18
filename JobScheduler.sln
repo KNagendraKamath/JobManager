@@ -9,9 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JobSchedulerConsole", "..\J
 	ProjectSection(ProjectDependencies) = postProject
 		{B475143D-454F-4B22-BE94-D6EC00901C82} = {B475143D-454F-4B22-BE94-D6EC00901C82}
 	EndProjectSection
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JobmanagerTest", "Test\JobmanagerTest\JobmanagerTest.csproj", "{B5FF45CF-D62F-4C42-BC3F-CB3D50AD5FA8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JobManagerTest", "..\JobManagerTest\JobManagerTest.csproj", "{B9593AB7-C52D-48F8-9BB4-4DCCFBB16D64}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JobmanagerTest", "Test\JobmanagerTest\JobmanagerTest.csproj", "{B5FF45CF-D62F-4C42-BC3F-CB3D50AD5FA8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,10 +26,6 @@ Global
 		{0AFD6D17-49AF-40F2-B821-400A162C784B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0AFD6D17-49AF-40F2-B821-400A162C784B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0AFD6D17-49AF-40F2-B821-400A162C784B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B9593AB7-C52D-48F8-9BB4-4DCCFBB16D64}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B9593AB7-C52D-48F8-9BB4-4DCCFBB16D64}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B9593AB7-C52D-48F8-9BB4-4DCCFBB16D64}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B9593AB7-C52D-48F8-9BB4-4DCCFBB16D64}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B5FF45CF-D62F-4C42-BC3F-CB3D50AD5FA8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B5FF45CF-D62F-4C42-BC3F-CB3D50AD5FA8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B5FF45CF-D62F-4C42-BC3F-CB3D50AD5FA8}.Release|Any CPU.ActiveCfg = Release|Any CPU
