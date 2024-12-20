@@ -17,6 +17,7 @@ public class JobRepository:IJobRepository
     {
         const string sql = @"
             INSERT INTO Job (
+                Id,
                 EffectiveDateTime, 
                 Description, 
                 Type, 
@@ -26,7 +27,9 @@ public class JobRepository:IJobRepository
                 UpdatedTime, 
                 CreatedById, 
                 UpdatedById)
-            VALUES (@EffectiveDateTime, 
+            VALUES (
+                    @Id,
+                    @EffectiveDateTime, 
                     @Description, 
                     @Type, 
                     @RecurringType, 

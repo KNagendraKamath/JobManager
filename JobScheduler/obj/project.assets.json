@@ -4852,24 +4852,19 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\nagka\\.nuget\\packages\\": {},
-    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
+    "C:\\Users\\suhsr\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\nagka\\Source\\Repos\\JobManager\\JobScheduler\\JobScheduler.csproj",
+      "projectUniqueName": "C:\\Users\\suhsr\\Source\\Repos\\JobManager\\JobScheduler\\JobScheduler.csproj",
       "projectName": "JobScheduler",
-      "projectPath": "C:\\Users\\nagka\\Source\\Repos\\JobManager\\JobScheduler\\JobScheduler.csproj",
-      "packagesPath": "C:\\Users\\nagka\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\nagka\\Source\\Repos\\JobManager\\JobScheduler\\obj\\",
+      "projectPath": "C:\\Users\\suhsr\\Source\\Repos\\JobManager\\JobScheduler\\JobScheduler.csproj",
+      "packagesPath": "C:\\Users\\suhsr\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\suhsr\\Source\\Repos\\JobManager\\JobScheduler\\obj\\",
       "projectStyle": "PackageReference",
-      "fallbackFolders": [
-        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-      ],
       "configFilePaths": [
-        "C:\\Users\\nagka\\AppData\\Roaming\\NuGet\\NuGet.Config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+        "C:\\Users\\suhsr\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
@@ -4895,8 +4890,7 @@
         "enableAudit": "true",
         "auditLevel": "low",
         "auditMode": "direct"
-      },
-      "SdkAnalysisLevel": "9.0.100"
+      }
     },
     "frameworks": {
       "net8.0": {
@@ -4947,7 +4941,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.101/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.303/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

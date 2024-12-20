@@ -18,13 +18,16 @@ public class JobConfigRepository : IJobConfigRepository
     {
         const string sql = @"
             INSERT INTO JobConfig (
+                Id,
                 Name, 
                 Active, 
                 CreatedTime, 
                 UpdatedTime, 
                 CreatedById, 
                 UpdatedById)
-            VALUES (@Name, 
+            VALUES (
+                    @Id,
+                    @Name, 
                     @Active, 
                     @CreatedTime, 
                     @UpdatedTime, 

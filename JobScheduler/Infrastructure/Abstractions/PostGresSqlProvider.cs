@@ -5,7 +5,7 @@ namespace JobScheduler.Infrastructure.Abstractions;
 
 public class PostGresSqlProvider:ISqlProvider
 {
-    private string _connectionString = "Server=AUTOHPDCSDWBAVD\\SQLEXPRESS;Database=JobScheduling;user id=sa; password=admin1234567890;TrustServerCertificate=True;";
+    private string _connectionString = "Host=127.0.0.1;Database=postgres;Username=postgres;Password=admin;Port=5432;SSL Mode=Disable";
 
     public IDbConnection CreateConnection()
     {
