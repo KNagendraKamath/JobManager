@@ -18,28 +18,6 @@ internal class Program
         ISqlProvider sqlProvider = new PostGresSqlProvider();
         JobConfigRepository repository = new JobConfigRepository(sqlProvider);
 
-        JobConfig newJobConfig = new JobConfig
-        {
-            Id=1234,
-            Name = "Test Job",
-            Active = true,
-            CreatedTime = DateTime.UtcNow,
-            UpdatedTime = DateTime.UtcNow,
-            CreatedById = 1,
-            UpdatedById = 1
-        };
-
-        try
-        {
-            long id = await repository.AddAsync(newJobConfig);
-            Console.WriteLine($"New JobConfig ID: {id}");
-
-            JobConfig retrievedJobConfig = await repository.GetByIdAsync(id);
-            Console.WriteLine($"Retrieved JobConfig: {retrievedJobConfig.Name}");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error: {ex.Message}");
-        }
+       
     }
 }

@@ -18,8 +18,8 @@ public class JobStepInstanceRepository:IJobStepInstanceRepository
     {
         const string sql = @"
             INSERT INTO JobStepInstance (
-                JobInstanceId, 
-                JobStatus, 
+                JobInstanceId,
+                jobstatus
                 StartTime, 
                 EndTime, 
                 Active, 
@@ -27,8 +27,9 @@ public class JobStepInstanceRepository:IJobStepInstanceRepository
                 UpdatedTime, 
                 CreatedById, 
                 UpdatedById)
-            VALUES (@JobInstanceId, 
-                    @JobStatus, 
+            VALUES (
+                    @JobInstanceId, 
+                    @jobstatus,
                     @StartTime, 
                     @EndTime, 
                     @Active, 

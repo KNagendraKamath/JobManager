@@ -17,15 +17,15 @@ public class JobInstanceRepository
     {
         const string sql = @"
             INSERT INTO JobInstance (
+                Id,
                 JobId, 
-                Status,
                 Active, 
                 CreatedTime, 
                 UpdatedTime, 
                 CreatedById, 
                 UpdatedById)
-            VALUES (@JobId, 
-                    @Status,
+            VALUES (@Id,
+                    @JobId, 
                     @Active, 
                     @CreatedTime, 
                     @UpdatedTime, 
@@ -55,7 +55,6 @@ public class JobInstanceRepository
         const string sql = @"
             UPDATE JobInstance
             SET JobId = @JobId,
-                Status = @Status,
                 Active = @Active,
                 CreatedTime = @CreatedTime,
                 UpdatedTime = @UpdatedTime,
