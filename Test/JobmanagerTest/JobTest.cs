@@ -7,6 +7,7 @@ using JobScheduler.Domain.Jobs;
 using JobScheduler.Infrastructure.Abstractions;
 using JobScheduler.Infrastructure.Repository;
 using Microsoft.Identity.Client;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace JobmanagerTest;
 public class JobTest
@@ -19,21 +20,22 @@ public class JobTest
 
         Job job = new Job
         {
-           
+      
             EffectiveDateTime = DateTime.UtcNow,
-            Description = "new Job",
+            Description = "Sample Job",
             Type = JobType.Recurring,
             RecurringType = RecurringType.Daily,
             Active = true,
-            CreatedTime = DateTimeOffset.UtcNow,
-            UpdatedTime = DateTimeOffset.UtcNow,
-            CreatedById = 2,
-            UpdatedById = 2
-        };
-        Task<long> id= jobRepository.AddAsync(job);
-        Assert.NotNull(id);
+            CreatedTime = DateTime.UtcNow,
+            UpdatedTime = DateTime.UtcNow,
+            CreatedById = 1,
+            UpdatedById = 1
+        }; 
 
+        long id = await jobRepository.AddAsync(job);
+        Assert.NotNull(id);
     }
+
     [Fact]
     public async Task GetAll()
     {
@@ -53,29 +55,29 @@ public class JobTest
         Job job =await jobRepository.GetByIdAsync(1);
         Assert.NotNull(job);
     }
-    //[Fact]
-    //public async Task TestUpdate()
-    //{
-    //    ISqlProvider sqlProvider = new PostGresSqlProvider();
-    //    IJobRepository jobRepository = new JobRepository(sqlProvider);
+    [Fact]
+    public async Task TestUpdate()
+    {
+        ISqlProvider sqlProvider = new PostGresSqlProvider();
+        IJobRepository jobRepository = new JobRepository(sqlProvider);
 
-    //    Job job = new Job
-    //    {
-    //        Id = 1,
-    //        EffectiveDateTime = DateTime.UtcNow,
-    //        Description = "new Job",
-    //        Type = JobType.Recurring,
-    //        RecurringType = RecurringType.Daily,
-    //        Active = true,
-    //        CreatedTime = DateTimeOffset.UtcNow,
-    //        UpdatedTime = DateTimeOffset.UtcNow,
-    //        CreatedById = 2,
-    //        UpdatedById = 2
-    //    };
-    //    bool value = await jobRepository.UpdateAsync(job);
-    //    Assert.True(value);
+        Job job = new Job
+        {
+            Id = 1,
+            EffectiveDateTime = DateTime.UtcNow,
+            Description = "new Job",
+            Type = JobType.Recurring,
+            RecurringType = RecurringType.Daily,
+            Active = true,
+            CreatedTime = DateTimeOffset.UtcNow,
+            UpdatedTime = DateTimeOffset.UtcNow,
+            CreatedById = 2,
+            UpdatedById = 2
+        };
+        bool value = await jobRepository.UpdateAsync(job);
+        Assert.True(value);
 
-    //}
+    }
     [Fact]
     public async Task TestDeleteById()
     {

@@ -18,8 +18,8 @@ public class JobStepInstanceLogTest
 
         JobStepInstanceLog newJobStepInstanceLog = new JobStepInstanceLog
         {
-                Id=1,
-                JobStepInstanceId=1,
+            
+                JobStepInstanceId=4,
                 Log="jfghhjf",
                 Active=true,
                 CreatedTime=DateTimeOffset.UtcNow,
@@ -28,7 +28,7 @@ public class JobStepInstanceLogTest
                 UpdatedById=1
         };
         long id = await repository.AddAsync(newJobStepInstanceLog);
-        Assert.Equal(newJobStepInstanceLog.Id, id);
+        Assert.NotNull(id);
     }
 
     [Fact]
@@ -37,12 +37,10 @@ public class JobStepInstanceLogTest
         ISqlProvider sqlProvider = new PostGresSqlProvider();
         JobStepInstanceLogRepository repository = new JobStepInstanceLogRepository(sqlProvider);
 
-        long id = 1;
+        long id = 2;
 
-       // JobInstance retrievedJobInstanceLog = await repository.GetByIdAsync(id);
-        //Assert.NotNull(retrievedJobInstanceLog);
-       // Assert.Equal(id, retrievedJobInstanceLog.Id);
-
+        JobStepInstanceLog retrievedJobInstanceLog = await repository.GetByIdAsync(id);
+        Assert.NotNull(retrievedJobInstanceLog);
     }
 
     [Fact]
@@ -59,13 +57,13 @@ public class JobStepInstanceLogTest
     public async Task TestUpdateAsync()
     {
         ISqlProvider sqlProvider = new PostGresSqlProvider();
-        JobInstanceRepository repository = new JobInstanceRepository(sqlProvider);
+        JobStepInstanceLogRepository repository = new JobStepInstanceLogRepository(sqlProvider);
 
-        JobInstance newJobInstance = new JobInstance
+        JobStepInstanceLog newJobInstance = new JobStepInstanceLog
         {
-            Id = 1,
-            JobId = 1,
-            //Status = Status.Running,
+            Id = 2,
+            JobStepInstanceId = 4,
+            Log = "jfghhjf",
             Active = true,
             CreatedTime = DateTimeOffset.UtcNow,
             UpdatedTime = DateTimeOffset.UtcNow,
@@ -73,6 +71,7 @@ public class JobStepInstanceLogTest
             UpdatedById = 1
         };
         Boolean value = await repository.UpdateAsync(newJobInstance);
+        Assert.True(value);
 
     }
     [Fact]

@@ -5,18 +5,18 @@ namespace JobScheduler.Domain.Jobs;
 
 public class Job:Entity
 {
-    private Job(string? description,
-               DateTime effectiveDateTime,
-               JobType jobType,
-               RecurringType? recurringType,
-               List<JobStep> jobSteps)
-    {
-        EffectiveDateTime = effectiveDateTime;
-        Description = description;
-        Type = jobType;
-        RecurringType = recurringType;
-        JobSteps = jobSteps;
-    }
+    //private Job(string? description,
+    //           DateTime effectiveDateTime,
+    //           JobType jobType,
+    //           RecurringType? recurringType,
+    //           List<JobStep> jobSteps)
+    //{
+    //    EffectiveDateTime = effectiveDateTime;
+    //    Description = description;
+    //    Type = jobType;
+    //    RecurringType = recurringType;
+    //    JobSteps = jobSteps;
+    //}
 
     public DateTime EffectiveDateTime { get; set; }
     public string? Description { get; set; }
@@ -24,14 +24,14 @@ public class Job:Entity
     public RecurringType? RecurringType { get; set; }
     public List<JobStep> JobSteps { get; set; } = new();
 
-    public static Job Create(string? description,
-                             DateTime effectiveDateTime,
-                             JobType jobType,
-                             RecurringType? recurringType,
-                             List<JobStep> jobSteps)
-    {
-        return new Job(description, effectiveDateTime, jobType, recurringType, jobSteps);
-    }
+    //public static Job Create(string? description,
+    //                         DateTime effectiveDateTime,
+    //                         JobType jobType,
+    //                         RecurringType? recurringType,
+    //                         List<JobStep> jobSteps)
+    //{
+    //    return new Job(description, effectiveDateTime, jobType, recurringType, jobSteps);
+    //}
 
 }
 public enum JobType

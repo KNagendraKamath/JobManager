@@ -19,9 +19,9 @@ public class JobInstanceTest
 
         JobInstance newJobInstance = new JobInstance
         {
-                Id=1,
-                JobId=1,
-                //Status=Status.Running,
+                
+                JobId=2,
+                JobStatus=Status.Running,
                 Active=true,
                 CreatedTime=DateTimeOffset.UtcNow,
                 UpdatedTime=DateTimeOffset.UtcNow,
@@ -29,7 +29,7 @@ public class JobInstanceTest
                 UpdatedById=1
         };
         long id = await repository.AddAsync(newJobInstance);
-        Assert.Equal(newJobInstance.Id, id);
+        Assert.NotNull(id);
     }
 
     [Fact]
@@ -38,7 +38,7 @@ public class JobInstanceTest
         ISqlProvider sqlProvider = new PostGresSqlProvider();
         JobInstanceRepository repository = new JobInstanceRepository(sqlProvider);
 
-        long id = 1;
+        long id = 2;
 
         JobInstance retrievedJobInstance = await repository.GetByIdAsync(id);
         Assert.NotNull(retrievedJobInstance);
@@ -64,9 +64,9 @@ public class JobInstanceTest
 
         JobInstance newJobInstance = new JobInstance
         {
-            Id=1,
+            Id=2,
             JobId = 1,
-            //Status = Status.Running,
+            JobStatus = Status.Running,
             Active = true,
             CreatedTime = DateTimeOffset.UtcNow,
             UpdatedTime = DateTimeOffset.UtcNow,
@@ -74,6 +74,7 @@ public class JobInstanceTest
             UpdatedById = 1
         };
         Boolean value = await repository.UpdateAsync(newJobInstance);
+        Assert.True(value);
 
     }
     [Fact]
@@ -82,7 +83,7 @@ public class JobInstanceTest
         ISqlProvider sqlProvider = new PostGresSqlProvider();
         JobInstanceRepository repository = new JobInstanceRepository(sqlProvider);
 
-        bool value = await repository.DeleteAsync(1);
+        bool value = await repository.DeleteAsync(2);
         Assert.True(value);
 
     }

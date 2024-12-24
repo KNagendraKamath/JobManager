@@ -19,7 +19,6 @@ public class JobStepTest
 
         JobStep newJobConfig = new JobStep
         {
-                Id=1,
                 JobId=1,
                 JobConfigId=1234,
                 Parameter="dsfgrfgfdge",
@@ -65,7 +64,7 @@ public class JobStepTest
 
         JobStep newJobConfig = new JobStep
         {
-            Id = 1,
+           
             JobId = 1,
             JobConfigId = 1234,
             Parameter = "dsfgrfgfdge",

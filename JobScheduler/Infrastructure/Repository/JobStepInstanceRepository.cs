@@ -19,7 +19,7 @@ public class JobStepInstanceRepository:IJobStepInstanceRepository
         const string sql = @"
             INSERT INTO JobStepInstance (
                 JobInstanceId,
-                jobstatus
+                jobstatus,
                 StartTime, 
                 EndTime, 
                 Active, 
@@ -29,7 +29,7 @@ public class JobStepInstanceRepository:IJobStepInstanceRepository
                 UpdatedById)
             VALUES (
                     @JobInstanceId, 
-                    @jobstatus,
+                    @jobstatus::job_status,
                     @StartTime, 
                     @EndTime, 
                     @Active, 
@@ -38,8 +38,21 @@ public class JobStepInstanceRepository:IJobStepInstanceRepository
                     @CreatedById, 
                     @UpdatedById)
             RETURNING Id;";
+        var parameters = new
+        {
+            jobStepInstance.JobInstanceId,
+            jobstatus = jobStepInstance.JobStatus.ToString(),
+            jobStepInstance.StartTime,
+            jobStepInstance.EndTime,
+            jobStepInstance.Active,
+            jobStepInstance.CreatedTime,
+            jobStepInstance.UpdatedTime,
+            jobStepInstance.CreatedById,
+            jobStepInstance.UpdatedById,
+        };
+
         using IDbConnection connection = _sqlProvider.CreateConnection();
-        return await connection.ExecuteScalarAsync<long>(sql, jobStepInstance);
+        return await connection.ExecuteScalarAsync<long>(sql, parameters);
     }
 
     public async Task<JobStepInstance> GetByIdAsync(long id)
@@ -61,7 +74,7 @@ public class JobStepInstanceRepository:IJobStepInstanceRepository
         const string sql = @"
             UPDATE JobStepInstance
             SET JobInstanceId = @JobInstanceId,
-                JobStatus = @JobStatus,
+                JobStatus = @JobStatus::job_status,
                 StartTime = @StartTime,
                 EndTime = @EndTime,
                 Active = @Active,
@@ -70,8 +83,21 @@ public class JobStepInstanceRepository:IJobStepInstanceRepository
                 CreatedById = @CreatedById,
                 UpdatedById = @UpdatedById
             WHERE Id = @Id;";
+        var parameters = new
+        {
+            jobStepInstance.JobInstanceId,
+            jobstatus = jobStepInstance.JobStatus.ToString(),
+            jobStepInstance.StartTime,
+            jobStepInstance.EndTime,
+            jobStepInstance.Active,
+            jobStepInstance.CreatedTime,
+            jobStepInstance.UpdatedTime,
+            jobStepInstance.CreatedById,
+            jobStepInstance.UpdatedById,
+        };
+
         using IDbConnection connection = _sqlProvider.CreateConnection();
-        int rowsAffected = await connection.ExecuteAsync(sql, jobStepInstance);
+        int rowsAffected = await connection.ExecuteAsync(sql, parameters);
         return rowsAffected > 0;
     }
 
