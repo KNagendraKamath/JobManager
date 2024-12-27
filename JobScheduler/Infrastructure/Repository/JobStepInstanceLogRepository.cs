@@ -18,7 +18,6 @@ public class JobStepInstanceLogRepository:IJobStepInstanceLogRepository
     {
         const string sql = @"
             INSERT INTO JobStepInstanceLog (
-                
                 JobStepInstanceId, 
                 Log, 
                 Active, 

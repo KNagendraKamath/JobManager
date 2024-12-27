@@ -28,16 +28,29 @@ public class JobRepository:IJobRepository
                 UpdatedById)
             VALUES (@EffectiveDateTime, 
                     @Description, 
-                    @Type, 
-                    @RecurringType, 
+                    @Type::job_type, 
+                    @RecurringType::recurring_type, 
                     @Active, 
                     @CreatedTime, 
                     @UpdatedTime, 
                     @CreatedById, 
                     @UpdatedById)
             RETURNING Id;";
+        var parameters = new
+        {
+            
+            job.EffectiveDateTime,
+            job.Description,
+            Type = job.Type.ToString(), 
+            RecurringType=job.RecurringType.ToString(),
+            job.Active,
+            job.CreatedTime,
+            job.UpdatedTime,
+            job.CreatedById,
+            job.UpdatedById
+        };
         using IDbConnection connection = _sqlProvider.CreateConnection();
-        return await connection.ExecuteScalarAsync<long>(sql, job);
+        return await connection.ExecuteScalarAsync<long>(sql, parameters);
     }
 
     public async Task<Job> GetByIdAsync(long id)
@@ -64,8 +77,8 @@ public class JobRepository:IJobRepository
             UPDATE Job
             SET EffectiveDateTime = @EffectiveDateTime,
                 Description = @Description,
-                Type = @Type,
-                RecurringType = @RecurringType,
+                Type = @Type::job_type,
+                RecurringType = @RecurringType::recurring_type,
                 Active = @Active,
                 CreatedTime = @CreatedTime,
                 UpdatedTime = @UpdatedTime,

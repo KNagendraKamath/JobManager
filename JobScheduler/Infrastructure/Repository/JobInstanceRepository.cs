@@ -17,14 +17,14 @@ public class JobInstanceRepository
     {
         const string sql = @"
             INSERT INTO JobInstance (
-                Id,
-                JobId, 
+                JobStatus,
+                jobId,
                 Active, 
                 CreatedTime, 
                 UpdatedTime, 
                 CreatedById, 
                 UpdatedById)
-            VALUES (@Id,
+            VALUES (@JobStatus::job_status,
                     @JobId, 
                     @Active, 
                     @CreatedTime, 
@@ -32,8 +32,20 @@ public class JobInstanceRepository
                     @CreatedById, 
                     @UpdatedById)
             RETURNING Id;";
+
+        var parameters = new
+        {
+            jobstatus= jobInstance.JobStatus.ToString(),
+            jobInstance.JobId,
+            jobInstance.Active,
+            jobInstance.CreatedTime,
+            jobInstance.UpdatedTime,
+            jobInstance.CreatedById,
+            jobInstance.UpdatedById
+        };
+             
         using IDbConnection connection = _sqlProvider.CreateConnection();
-        return await connection.ExecuteScalarAsync<long>(sql, jobInstance);
+        return await connection.ExecuteScalarAsync<long>(sql, parameters);
     }
 
     public async Task<JobInstance> GetByIdAsync(long id)
@@ -55,14 +67,26 @@ public class JobInstanceRepository
         const string sql = @"
             UPDATE JobInstance
             SET JobId = @JobId,
+                JobStatus=@JobStatus::job_status,
                 Active = @Active,
                 CreatedTime = @CreatedTime,
                 UpdatedTime = @UpdatedTime,
                 CreatedById = @CreatedById,
                 UpdatedById = @UpdatedById
             WHERE Id = @Id;";
+
+        var parameters = new
+        {
+            jobstatus = jobInstance.JobStatus.ToString(),
+            jobInstance.Active,
+            jobInstance.CreatedTime,
+            jobInstance.UpdatedTime,
+            jobInstance.CreatedById,
+            jobInstance.UpdatedById
+        };
+
         using IDbConnection connection = _sqlProvider.CreateConnection();
-        int rowsAffected = await connection.ExecuteAsync(sql, jobInstance);
+        int rowsAffected = await connection.ExecuteAsync(sql, parameters);
         return rowsAffected > 0;
     }
 
