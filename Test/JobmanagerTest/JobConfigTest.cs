@@ -2,7 +2,7 @@ using System.Data;
 using System.Text.Json;
 using Dapper;
 using JobScheduler.Application.Abstractions;
-using JobScheduler.Domain.Jobs;
+using JobScheduler.Domain.Job;
 using JobScheduler.Infrastructure.Abstractions;
 using JobScheduler.Infrastructure.Repository;
 

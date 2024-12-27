@@ -1,7 +1,7 @@
 ﻿
 using JobScheduler.Domain.Abstractions;
 
-namespace JobScheduler.Domain.Models;
+namespace JobScheduler.Domain.JobInstance;
 
 public class JobStepInstance:Entity
 {

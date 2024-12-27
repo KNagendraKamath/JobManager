@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using JobScheduler.Domain.Jobs;
-using JobScheduler.Domain.Models;
+using JobScheduler.Domain.JobInstance;
 using JobScheduler.Infrastructure.Abstractions;
 using JobScheduler.Infrastructure.Repository;
 

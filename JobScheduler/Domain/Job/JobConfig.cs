@@ -1,6 +1,6 @@
 ﻿using JobScheduler.Domain.Abstractions;
 
-namespace JobScheduler.Domain.Jobs;
+namespace JobScheduler.Domain.Job;
 
 public class JobConfig:Entity
 {

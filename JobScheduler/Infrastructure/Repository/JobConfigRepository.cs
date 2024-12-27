@@ -1,6 +1,6 @@
 ﻿using System.Data;
 using Dapper;
-using JobScheduler.Domain.Jobs;
+using JobScheduler.Domain.Job;
 using JobScheduler.Infrastructure.Abstractions;
 
 namespace JobScheduler.Infrastructure.Repository;
@@ -18,16 +18,13 @@ public class JobConfigRepository : IJobConfigRepository
     {
         const string sql = @"
             INSERT INTO JobConfig (
-                Id,
                 Name, 
                 Active, 
                 CreatedTime, 
                 UpdatedTime, 
                 CreatedById, 
                 UpdatedById)
-            VALUES (
-                    @Id,
-                    @Name, 
+            VALUES (@Name, 
                     @Active, 
                     @CreatedTime, 
                     @UpdatedTime, 

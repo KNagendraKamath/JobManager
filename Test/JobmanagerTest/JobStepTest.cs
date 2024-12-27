@@ -4,7 +4,7 @@ using System.Linq;
 using System.Reflection.Metadata;
 using System.Text;
 using System.Threading.Tasks;
-using JobScheduler.Domain.Jobs;
+using JobScheduler.Domain.Job;
 using JobScheduler.Infrastructure.Abstractions;
 using JobScheduler.Infrastructure.Repository;
 

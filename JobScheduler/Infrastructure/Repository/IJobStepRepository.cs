@@ -1,4 +1,4 @@
-﻿using JobScheduler.Domain.Jobs;
+﻿using JobScheduler.Domain.Job;
 
 namespace JobScheduler.Infrastructure.Repository;
 public interface IJobStepRepository

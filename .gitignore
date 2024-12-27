@@ -2,16 +2,7 @@
 # This .gitignore file was automatically created by Microsoft(R) Visual Studio.
 ################################################################################
 
+**/.idea
 /.vs
-/bin/Debug/net8.0
-/obj
-/Test/JobmanagerTest/bin/Debug/net8.0
-/Test/JobmanagerTest/obj
-/.idea/.idea.JobScheduler/.idea
-/JobManagerConsole/bin/Debug/net8.0
-/JobManagerConsole/obj
-/JobScheduler/bin/Debug/net8.0
-/JobScheduler/obj/Debug/net8.0/ref
-/JobScheduler/obj/Debug/net8.0/refint
-/JobScheduler/.vs/JobScheduler/FileContentIndex
-/JobScheduler/.vs
+**/bin/*
+**/obj/*

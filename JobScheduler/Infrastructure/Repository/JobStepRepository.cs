@@ -1,6 +1,6 @@
 ﻿using System.Data;
 using Dapper;
-using JobScheduler.Domain.Jobs;
+using JobScheduler.Domain.Job;
 using JobScheduler.Infrastructure.Abstractions;
 
 namespace JobScheduler.Infrastructure.Repository;

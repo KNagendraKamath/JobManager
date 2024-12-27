@@ -1,4 +1,4 @@
-﻿using JobScheduler.Domain.Models;
+﻿using JobScheduler.Domain.JobInstance;
 
 namespace JobScheduler.Infrastructure.Repository;
 internal interface IJobStepInstanceLogRepository

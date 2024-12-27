@@ -1,6 +1,6 @@
 ﻿using System.Data;
 using Dapper;
-using JobScheduler.Domain.Jobs;
+using JobScheduler.Domain.Job;
 using JobScheduler.Infrastructure.Abstractions;
 
 namespace JobScheduler.Infrastructure.Repository;
@@ -26,8 +26,7 @@ public class JobRepository:IJobRepository
                 UpdatedTime, 
                 CreatedById, 
                 UpdatedById)
-            VALUES ( 
-                    @EffectiveDateTime, 
+            VALUES (@EffectiveDateTime, 
                     @Description, 
                     @Type, 
                     @RecurringType, 
