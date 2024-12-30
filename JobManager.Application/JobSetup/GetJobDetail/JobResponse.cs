@@ -1,15 +1,14 @@
-﻿using JobManager.Domain.JobSetup;
-
+﻿
 namespace JobManager.Application.JobSetup.GetJobDetail;
-internal class JobResponse
+public sealed class JobResponse
 {
     public long JobId { get; init;}
     public string Name { get; init;}
     public DateTime EffectiveDateTime { get; init;}
-    public List<JobStepResponse> Steps { get; init;}
+    public List<JobStepResponse> Steps { get; init; } = new();
 }
 
-internal class JobStepResponse
+public sealed class JobStepResponse
 {
     public long JobStepId { get; init; }
     public string JobConfigName { get; init; }

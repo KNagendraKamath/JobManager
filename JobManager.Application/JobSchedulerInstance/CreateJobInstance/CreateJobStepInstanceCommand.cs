@@ -1,5 +1,5 @@
 ﻿using JobManager.Application.Abstractions.Messaging;
 
 namespace JobManager.Application.JobSchedulerInstance.CreateJobInstance;
-public record CreateJobInstanceCommand(long JobId) : ICommand<long>;
+public record CreateJobStepInstanceCommand(long JobInstanceId, long JobStepId) : ICommand<long>;
 

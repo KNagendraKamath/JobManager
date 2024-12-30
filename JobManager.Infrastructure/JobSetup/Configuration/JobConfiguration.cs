@@ -8,7 +8,7 @@ internal sealed class JobConfiguration : IEntityTypeConfiguration<Job>
     public void Configure(EntityTypeBuilder<Job> builder)
     {
 
-        builder.ToTable("job");
+        builder.ToTable(nameof(Job));
 
         builder.Property(job => job.Type)
                .HasConversion(

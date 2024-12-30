@@ -1,5 +1,6 @@
 ﻿
 using JobManager.Domain.Abstractions;
+using JobManager.Domain.JobSetup;
 
 namespace JobManager.Domain.JobSchedulerInstance;
 
@@ -18,6 +19,7 @@ public class JobInstance:Entity
     }
 
     public long JobId {  get; private set; }
+    public Job Job { get; private set; }
     public Status Status { get; private set; }
     public List<JobStepInstance> JobStepInstances { get; private set; }
 

@@ -9,7 +9,11 @@ namespace JobManager.Application.JobSetup.GetJobDetail;
 internal sealed class GetPendingOneTimeAndRecurringJobQueryHandler : IQueryHandler<GetPendingOneTimeAndRecurringJobQuery, List<JobResponse>>
 {
     private readonly ISqlConnectionFactory _sqlConnectionFactory;
-    
+
+    public GetPendingOneTimeAndRecurringJobQueryHandler(ISqlConnectionFactory sqlConnectionFactory)
+    {
+        _sqlConnectionFactory = sqlConnectionFactory;
+    }
 
     public async Task<Result<List<JobResponse>>> Handle(GetPendingOneTimeAndRecurringJobQuery request, CancellationToken cancellationToken)
     {
