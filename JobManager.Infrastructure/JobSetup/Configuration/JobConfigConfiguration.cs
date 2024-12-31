@@ -7,7 +7,7 @@ internal sealed class JobConfigConfiguration : IEntityTypeConfiguration<JobConfi
 {
     public void Configure(EntityTypeBuilder<JobConfig> builder)
     {
-        builder.ToTable(nameof(JobConfig));
+        builder.ToTable("job_config");
         builder.HasKey(jobConfig => jobConfig.Id);
     }
 }

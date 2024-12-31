@@ -7,7 +7,7 @@ internal class JobStepInstanceLogConfiguration : IEntityTypeConfiguration<JobSte
 {
     public void Configure(EntityTypeBuilder<JobStepInstanceLog> builder)
     {
-        builder.ToTable(nameof(JobStepInstanceLog));
+        builder.ToTable("job_step_instance_log");
         builder.HasKey(j => j.Id);
         builder.HasOne(j => j.JobStepInstance)
             .WithMany(j => j.JobStepInstanceLogs)

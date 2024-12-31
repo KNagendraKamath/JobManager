@@ -7,7 +7,7 @@ internal class JobStepConfiguration : IEntityTypeConfiguration<JobStep>
 {
     public void Configure(EntityTypeBuilder<JobStep> builder)
     {
-        builder.ToTable(nameof(JobStep));
+        builder.ToTable("job_step");
 
         builder.HasKey(jobStep => jobStep.Id);
 

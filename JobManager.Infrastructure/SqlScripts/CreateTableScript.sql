@@ -1,143 +1,144 @@
 ﻿DO $$
 BEGIN
-DROP SCHEMA public CASCADE;
-CREATE SCHEMA public;
-GRANT ALL ON SCHEMA public TO postgres;
-GRANT ALL ON SCHEMA public TO public;
+    DROP SCHEMA public CASCADE;
+    CREATE SCHEMA public;
+    GRANT ALL ON SCHEMA public TO postgres;
+    GRANT ALL ON SCHEMA public TO public;
 END $$;
 
 DO $$ 
 BEGIN
-CREATE TYPE "JobType" AS ENUM ('None','Onetime','Recurring');
+    CREATE TYPE "JobType" AS ENUM ('None','Onetime','Recurring');
 END $$;
 
 DO $$ 
 BEGIN
-CREATE TYPE "RecurringType" AS ENUM (
-    'None',
-    'EveryMinute',
-    'EverySecond',
-    'Daily',
-    'Weekly',
-    'Monthly');
+    CREATE TYPE "RecurringType" AS ENUM (
+        'None',
+        'EveryMinute',
+        'EverySecond',
+        'Daily',
+        'Weekly',
+        'Monthly');
 END $$;
-	
+    
 DO $$ 
 BEGIN
-    IF EXISTS (SELECT 1 FROM pg_tables WHERE tablename = 'JobConfig') THEN
-        DROP TABLE "JobConfig";
+    IF EXISTS (SELECT 1 FROM pg_tables WHERE tablename = 'job_config') THEN
+        DROP TABLE "job_config";
     END IF;
-    CREATE TABLE "JobConfig" (
-        "Id" BIGSERIAL  PRIMARY KEY ,
-        "Name" VARCHAR(200) NOT NULL,
-        "Active" BOOLEAN NOT NULL,
-        "CreatedTime" TIMESTAMPTZ NOT NULL,
-        "UpdatedTime" TIMESTAMPTZ NULL,
-        "CreatedById" BIGINT NOT NULL,
-        "UpdatedById" BIGINT NULL
+    CREATE TABLE "job_config" (
+        "id" BIGSERIAL PRIMARY KEY,
+        "name" VARCHAR(200) NOT NULL,
+        "active" BOOLEAN NOT NULL,
+        "created_time" TIMESTAMPTZ NOT NULL,
+        "updated_time" TIMESTAMPTZ NULL,
+        "created_by_id" BIGINT NOT NULL,
+        "updated_by_id" BIGINT NULL
     );
 END $$;
 
 DO $$ 
 BEGIN
-    IF EXISTS (SELECT 1 FROM pg_tables WHERE tablename = 'Job') THEN
-        DROP TABLE "Job";
+    IF EXISTS (SELECT 1 FROM pg_tables WHERE tablename = 'job') THEN
+        DROP TABLE "job";
     END IF;
-    CREATE TABLE "Job" (
-        "Id" BIGSERIAL PRIMARY KEY,
-        "EffectiveDateTime" TIMESTAMP NOT NULL,
-        "Description" TEXT,
-        "Type" VARCHAR(50) NOT NULL,
-        "RecurringType" VARCHAR(50),
-        "Active" BOOLEAN NOT NULL,
-        "CreatedTime" TIMESTAMPTZ NOT NULL,
-        "UpdatedTime" TIMESTAMPTZ NULL,
-        "CreatedById" BIGINT NOT NULL,
-        "UpdatedById" BIGINT NULL
+    CREATE TABLE "job" (
+        "id" BIGSERIAL PRIMARY KEY,
+        "effective_date_time" TIMESTAMP NOT NULL,
+        "description" TEXT,
+        "type" VARCHAR(50) NOT NULL,
+        "recurring_type" VARCHAR(50),
+        "active" BOOLEAN NOT NULL,
+        "created_time" TIMESTAMPTZ NOT NULL,
+        "updated_time" TIMESTAMPTZ NULL,
+        "created_by_id" BIGINT NOT NULL,
+        "updated_by_id" BIGINT NULL
     );
 END $$;
 
 DO $$ 
 BEGIN
-    IF EXISTS (SELECT 1 FROM pg_tables WHERE tablename = 'JobStep') THEN
-        DROP TABLE "JobStep";
+    IF EXISTS (SELECT 1 FROM pg_tables WHERE tablename = 'job_step') THEN
+        DROP TABLE "job_step";
     END IF;
-    CREATE TABLE "JobStep" (
-        "Id" BIGSERIAL PRIMARY KEY,
-        "JobId" BIGINT NOT NULL,
-        "JobConfigId" BIGINT NOT NULL,
-        "JsonParameter" TEXT NOT NULL,
-        "Active" BOOLEAN NOT NULL,
-        "CreatedTime" TIMESTAMPTZ NOT NULL,
-        "UpdatedTime" TIMESTAMPTZ NULL,
-        "CreatedById" BIGINT NOT NULL,
-        "UpdatedById" BIGINT NULL,
-        FOREIGN KEY ("JobId") REFERENCES "Job"("Id"),
-        FOREIGN KEY ("JobConfigId") REFERENCES "JobConfig"("Id")
+    CREATE TABLE "job_step" (
+        "id" BIGSERIAL PRIMARY KEY,
+        "job_id" BIGINT NOT NULL,
+        "job_config_id" BIGINT NOT NULL,
+        "json_parameter" TEXT NOT NULL,
+        "active" BOOLEAN NOT NULL,
+        "created_time" TIMESTAMPTZ NOT NULL,
+        "updated_time" TIMESTAMPTZ NULL,
+        "created_by_id" BIGINT NOT NULL,
+        "updated_by_id" BIGINT NULL,
+        FOREIGN KEY ("job_id") REFERENCES "job"("id"),
+        FOREIGN KEY ("job_config_id") REFERENCES "job_config"("id")
     );
 END $$;
 
 DO $$ 
 BEGIN
-CREATE TYPE "Status" AS ENUM ('NotStarted','Running','Completed','CompletedWithErrors','Faulted');
+    CREATE TYPE "Status" AS ENUM ('NotStarted','Running','Completed','CompletedWithErrors','Faulted');
 END $$;
 
 DO $$ 
 BEGIN
-    IF EXISTS (SELECT 1 FROM pg_tables WHERE tablename = 'JobInstance') THEN
-        DROP TABLE "JobInstance";
+    IF EXISTS (SELECT 1 FROM pg_tables WHERE tablename = 'job_instance') THEN
+        DROP TABLE "job_instance";
     END IF;
-    CREATE TABLE "JobInstance" (
-        "Id" BIGSERIAL PRIMARY KEY,
-        "JobStatus" VARCHAR(50) NOT NULL,
-        "JobId" BIGINT NOT NULL,
-        "Active" BOOLEAN NOT NULL,
-        "CreatedTime" TIMESTAMPTZ NOT NULL,
-        "UpdatedTime" TIMESTAMPTZ NULL,
-        "CreatedById" BIGINT NOT NULL,
-        "UpdatedById" BIGINT NULL,
-        FOREIGN KEY ("JobId") REFERENCES "Job"("Id")
+    CREATE TABLE "job_instance" (
+        "id" BIGSERIAL PRIMARY KEY,
+        "status" VARCHAR(50) NOT NULL,
+        "job_id" BIGINT NOT NULL,
+        "active" BOOLEAN NOT NULL,
+        "created_time" TIMESTAMPTZ NOT NULL,
+        "updated_time" TIMESTAMPTZ NULL,
+        "created_by_id" BIGINT NOT NULL,
+        "updated_by_id" BIGINT NULL,
+        FOREIGN KEY ("job_id") REFERENCES "job"("id")
     );
 END $$;
 
 DO $$ 
 BEGIN
-    IF EXISTS (SELECT 1 FROM pg_tables WHERE tablename = 'JobStepInstance') THEN
-        DROP TABLE "JobStepInstance";
+    IF EXISTS (SELECT 1 FROM pg_tables WHERE tablename = 'job_step_instance') THEN
+        DROP TABLE "job_step_instance";
     END IF;
-    CREATE TABLE "JobStepInstance" (
-        "Id" BIGSERIAL PRIMARY KEY,
-        "JobInstanceId" BIGINT NOT NULL,
-        "JobStatus" VARCHAR(50) NOT NULL,
-        "StartTime" TIMESTAMPTZ NOT NULL,
-        "EndTime" TIMESTAMPTZ,
-        "Active" BOOLEAN NOT NULL,
-        "CreatedTime" TIMESTAMPTZ NOT NULL,
-        "UpdatedTime" TIMESTAMPTZ NULL,
-        "CreatedById" BIGINT NOT NULL,
-        "UpdatedById" BIGINT NULL,
-        FOREIGN KEY ("JobInstanceId") REFERENCES "JobInstance"("Id")
+    CREATE TABLE "job_step_instance" (
+        "id" BIGSERIAL PRIMARY KEY,
+        "job_instance_id" BIGINT NOT NULL,
+        "job_step_id" BIGINT NOT NULL,
+        "status" VARCHAR(50) NOT NULL,
+        "start_time" TIMESTAMPTZ NOT NULL,
+        "end_time" TIMESTAMPTZ,
+        "active" BOOLEAN NOT NULL,
+        "created_time" TIMESTAMPTZ NOT NULL,
+        "updated_time" TIMESTAMPTZ NULL,
+        "created_by_id" BIGINT NOT NULL,
+        "updated_by_id" BIGINT NULL,
+        FOREIGN KEY ("job_instance_id") REFERENCES "job_instance"("id")
     );
 END $$;
 
 DO $$ 
 BEGIN
-    IF EXISTS (SELECT 1 FROM pg_tables WHERE tablename = 'JobStepInstanceLog') THEN
-        DROP TABLE "JobStepInstanceLog";
+    IF EXISTS (SELECT 1 FROM pg_tables WHERE tablename = 'job_step_instance_log') THEN
+        DROP TABLE "job_step_instance_log";
     END IF;
-    CREATE TABLE "JobStepInstanceLog" (
-        "Id" BIGSERIAL PRIMARY KEY,
-        "JobStepInstanceId" BIGINT NOT NULL,
-        "Log" TEXT NOT NULL,
-        "Active" BOOLEAN NOT NULL,
-        "CreatedTime" TIMESTAMPTZ NOT NULL,
-        "UpdatedTime" TIMESTAMPTZ NULL,
-        "CreatedById" BIGINT NOT NULL,
-        "UpdatedById" BIGINT NULL,
-        FOREIGN KEY ("JobStepInstanceId") REFERENCES "JobStepInstance"("Id")
+    CREATE TABLE "job_step_instance_log" (
+        "id" BIGSERIAL PRIMARY KEY,
+        "job_step_instance_id" BIGINT NOT NULL,
+        "log" TEXT NOT NULL,
+        "active" BOOLEAN NOT NULL,
+        "created_time" TIMESTAMPTZ NOT NULL,
+        "updated_time" TIMESTAMPTZ NULL,
+        "created_by_id" BIGINT NOT NULL,
+        "updated_by_id" BIGINT NULL,
+        FOREIGN KEY ("job_step_instance_id") REFERENCES "job_step_instance"("id")
     );
 END $$;
 
-INSERT INTO public."JobConfig"(
-  "Name", "Active", "CreatedTime", "CreatedById")
-	VALUES ('Job.ProjectLayer.Test,Job.ProjectLayer', true, CURRENT_TIMESTAMP, 1);
+INSERT INTO public."job_config"(
+  "name", "active", "created_time", "created_by_id")
+    VALUES ('Job.ProjectLayer.Test,Job.ProjectLayer', true, CURRENT_TIMESTAMP, 1);

@@ -11,6 +11,9 @@ public class JobStepInstanceLog:Entity
     {
         JobStepInstanceId = jobStepInstanceId;
         Log = log;
+        CreatedById = 1;
+        CreatedTime = DateTime.UtcNow;
+        Active = true;
     }
 
     public long JobStepInstanceId {  get; set; }

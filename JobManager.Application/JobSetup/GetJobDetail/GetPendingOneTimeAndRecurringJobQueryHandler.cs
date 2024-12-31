@@ -21,18 +21,18 @@ internal sealed class GetPendingOneTimeAndRecurringJobQueryHandler : IQueryHandl
 
         const string sql = """
             SELECT
-                Job.Id as JobId,
-                Job.Description,
-                Job.EffectiveDateTime,
-                JobStep.Id as JobStepId,
-                JobConfig.Name as JobConfigName,
-                JobStep.JsonParameter
-            FROM Job
-                JOIN JobStep
-                    ON Job.Id = JobStep.JobId
-                JOIN JobConfig
-                    ON JobStep.JobConfigId = JobConfig.Id
-            WHERE Job.Type = 'Onetime'
+                job.id AS JobId,
+                job.description as Description,
+                job.effective_date_time as EffectiveDateTime,
+                job_step.id AS JobStepId,
+                job_config.name AS JobConfigName,
+                job_step.json_parameter As JsonParameter
+            FROM job
+                JOIN job_step
+                    ON job.id = job_step.job_id
+                JOIN job_config
+                    ON job_step.job_config_id = job_config.id
+            WHERE job.type = 'Onetime';
             """;
 
         

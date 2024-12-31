@@ -7,7 +7,13 @@ internal class JobStepInstanceConfiguration : IEntityTypeConfiguration<JobStepIn
 {
     public void Configure(EntityTypeBuilder<JobStepInstance> builder)
     {
-        builder.ToTable(nameof(JobStepInstance));
+        builder.ToTable("job_step_instance");
+
+        builder.Property(j => j.Status)
+      .HasConversion(
+       v => v.ToString(),
+       v => (Status)Enum.Parse(typeof(Status), v!))
+    .HasColumnName("status");
 
         builder.HasKey(j => j.Id);
 

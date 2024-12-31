@@ -49,8 +49,8 @@ public static class DependencyInjection
         services.AddDbContext<JobDbContext>(options =>
         {
             options.UseNpgsql(connectionString)
-                    .UseLowerCaseNamingConvention()
-                    .LogTo(message => Debug.WriteLine(message), LogLevel.Trace);
+                   .UseSnakeCaseNamingConvention()
+                   .LogTo(message => Debug.WriteLine(message), LogLevel.Trace);
         });
 
         services.AddScoped<IJobConfigRepository, JobConfigRepository>();

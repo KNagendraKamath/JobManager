@@ -23,12 +23,11 @@ public class Worker : BackgroundService
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         _scheduler = await _schedulerFactory.GetScheduler(stoppingToken);
-
-        await ScheduleJobsFromDatabase(stoppingToken);
-        StartPollingDatabase(stoppingToken);
-
         while (!stoppingToken.IsCancellationRequested)
+        {
+            StartPollingDatabase(stoppingToken);
             await Task.Delay(1000, stoppingToken);
+        }
     }
 
     private async Task ScheduleJobsFromDatabase(CancellationToken cancellationToken)

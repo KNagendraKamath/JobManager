@@ -13,6 +13,9 @@ public class JobStepInstance:Entity
         JobInstanceId = jobInstanceId;
         JobStepId = jobStepId;
         Status = stepInstanceStatus;
+        CreatedById = 1;
+        CreatedTime = DateTime.UtcNow;
+        Active = true;
     }
 
     public long JobInstanceId {  get; private set; }

@@ -8,7 +8,7 @@ internal sealed class JobConfiguration : IEntityTypeConfiguration<Job>
     public void Configure(EntityTypeBuilder<Job> builder)
     {
 
-        builder.ToTable(nameof(Job));
+        builder.ToTable("job");
 
         builder.Property(job => job.Type)
                .HasConversion(
@@ -20,7 +20,7 @@ internal sealed class JobConfiguration : IEntityTypeConfiguration<Job>
             .HasConversion(
                 v => v.ToString(), // Convert enum to string for storage
                 v => (RecurringType)Enum.Parse(typeof(RecurringType), v!))
-            .HasColumnName("recurringtype"); 
+            .HasColumnName("recurring_type"); 
 
         builder.HasKey(job => job.Id);
 

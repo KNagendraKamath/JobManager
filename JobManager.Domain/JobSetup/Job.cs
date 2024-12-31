@@ -1,5 +1,4 @@
-﻿using System.Collections.ObjectModel;
-using JobManager.Domain.Abstractions;
+﻿using JobManager.Domain.Abstractions;
 
 namespace JobManager.Domain.JobSetup;
 
@@ -12,6 +11,7 @@ public class Job : Entity
                 DateTime effectiveDateTime,
                 JobType jobType,
                 RecurringType recurringType,
+                string? cronExpression,
                 long createdById)
     {
         EffectiveDateTime = effectiveDateTime;
@@ -20,6 +20,7 @@ public class Job : Entity
         RecurringType = recurringType;
         Active = true;
         CreatedById = createdById;
+        CreatedTime = DateTime.UtcNow;
         JobSteps = new();
     }
 
@@ -27,22 +28,23 @@ public class Job : Entity
     public string? Description { get; private set; }
     public JobType Type { get; private set; }
     public RecurringType RecurringType { get; private set; }
+    private string CronExpression { get; set; }
     public List<JobStep> JobSteps { get; private set; }
 
     public static Job Create(string? description,
                              DateTime effectiveDateTime,
                              JobType jobType,
                              RecurringType recurringType,
+                             string? cronExpression,
                              long createdById)
     {
-        return new Job(description, effectiveDateTime, jobType, recurringType, createdById);
+        return new Job(description, effectiveDateTime, jobType, recurringType,cronExpression, createdById);
     }
 
     public void AddJobStep(JobStep jobStep)
     {
         if (jobStep is null)
             throw new ArgumentNullException(nameof(JobStep));
-
         JobSteps.Add(jobStep);
     }
 
@@ -53,21 +55,9 @@ public class Job : Entity
 
         JobSteps.Remove(jobStep);
     }
-}
 
-public enum JobType
-{
-    None,
-    Onetime,
-    Recurring
-}
-
-public enum RecurringType
-{
-    None,
-    EveryMinute,
-    EverySecond,
-    Daily,
-    Weekly,
-    Monthly
+    public void Schedule()
+    {
+        Scheduled = true;
+    }
 }

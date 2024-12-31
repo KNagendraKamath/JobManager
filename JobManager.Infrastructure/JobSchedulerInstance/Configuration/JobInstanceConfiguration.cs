@@ -7,13 +7,13 @@ internal class JobInstanceConfiguration : IEntityTypeConfiguration<JobInstance>
 {
     public void Configure(EntityTypeBuilder<JobInstance> builder)
     {
-        builder.ToTable(nameof(JobInstance));
+        builder.ToTable("job_instance");
 
         builder.Property(j => j.Status)
               .HasConversion(
                v => v.ToString(), // Convert enum to string for storage
                v => (Status)Enum.Parse(typeof(Status), v!))
-            .HasColumnName("Status");
+            .HasColumnName("status");
 
         builder.HasKey(j => j.Id);
 
