@@ -3,8 +3,8 @@
 public enum RecurringType
 {
     None,
-    EveryMinute,
-    EverySecond,
+    EveryNoSecond,
+    EveryNoMinute,
     Daily,
     Weekly,
     Monthly

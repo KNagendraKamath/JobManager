@@ -1,4 +1,6 @@
-﻿using JobManager.Application.JobSchedulerInstance.CreateJobInstance;
+﻿using System.Text.Json;
+using JobManager.Application.JobSchedulerInstance.CreateJobInstance;
+using JobManager.Application.JobSchedulerInstance.UpdateJobInstance;
 using JobManager.Domain.Abstractions;
 using JobManager.Domain.JobSchedulerInstance;
 using JobManager.Infrastructure.Abstractions;
@@ -11,7 +13,7 @@ public abstract class BaseJobInstance<TParameter>:IJob
 {
     private ISender Sender { get; set; } = ServiceLocator.GetInstance<ISender>();
 
-    protected TParameter Parameter { get; init; }
+    protected TParameter? Parameter { get; private set; }
 
     public async Task Execute(IJobExecutionContext context)
     {
@@ -34,18 +36,31 @@ public abstract class BaseJobInstance<TParameter>:IJob
 
         long jobStepInstanceId = jobInstanceResult.Value;
 
-        await UpdateJobStepInstanceStatus(jobStepInstanceId,Status.Running);
+        await UpdateInstanceStatus(jobInstanceId, jobStepInstanceId,Status.Running);
+
         try
         {
+            JobDataMap dataMap = context.JobDetail.JobDataMap;
+            Parameter = JsonSerializer.Deserialize<TParameter>(dataMap.GetString("jsonParameter") ?? "{}");
             await Execute();
-            await UpdateJobStepInstanceStatus(jobStepInstanceId, Status.Completed);
-
+            await UpdateInstanceStatus(jobInstanceId, jobStepInstanceId, Status.Completed);
         }
         catch (Exception ex)
         {
-            await UpdateJobStepInstanceStatus(jobStepInstanceId, Status.CompletedWithErrors);
+            await UpdateInstanceStatus(jobInstanceId, jobStepInstanceId, Status.CompletedWithErrors);
             await Sender.Send(new LogJobStepInstanceCommand(jobStepInstanceId, ex.Message));
         }
+    }
+
+    private async Task UpdateInstanceStatus(long jobInstanceId, long jobStepInstanceId,Status status)
+    {
+        await UpdateJobStepInstanceStatus(jobStepInstanceId, status);
+        await UpdateJobInstanceStatus(jobInstanceId, status);
+    }
+
+    private async Task UpdateJobInstanceStatus(long jobInstanceId, Status status)
+    {
+        await Sender.Send(new UpdateJobInstanceStatusCommand(jobInstanceId, status));
     }
 
     private async Task UpdateJobStepInstanceStatus(long jobStepInstanceId,Status status)

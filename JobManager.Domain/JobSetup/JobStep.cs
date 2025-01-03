@@ -13,9 +13,6 @@ public class JobStep:Entity
         JobConfigId = jobConfig.Id;
         JobConfig = jobConfig;
         JsonParameter = jsonParameter;
-        Active = true;
-        CreatedById = job.CreatedById;
-        CreatedTime = DateTime.UtcNow;
     }
 
     public long JobId { get; private set; }

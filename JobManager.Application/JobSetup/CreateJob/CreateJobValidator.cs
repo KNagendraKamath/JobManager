@@ -9,8 +9,6 @@ internal class CreateJobValidator:AbstractValidator<CreateJobCommand>
         RuleFor(x => x.Description).NotEmpty().MaximumLength(200);
         RuleFor(x => x.EffectiveDateTime).GreaterThanOrEqualTo(DateTime.UtcNow);
         RuleFor(x => x.JobType).NotEqual(JobType.None).WithMessage("Job Type must be specified");
-        RuleFor(x => x.RecurringType).NotEmpty().When(x => x.JobType == JobType.Recurring);
         RuleFor(x => x.JobSteps).NotEmpty();
-        RuleFor(x => x.CreatedById).NotEmpty();
     }
 }

@@ -1,4 +1,5 @@
-﻿using JobManager.Domain.Abstractions;
+﻿using System;
+using JobManager.Domain.Abstractions;
 using Microsoft.EntityFrameworkCore;
 
 namespace JobManager.Infrastructure.Abstractions;
@@ -19,9 +20,20 @@ internal abstract class Repository<T>
             .FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
     }
 
-    public virtual void Add(T entity) => DbContext.Add(entity);
+    public virtual void Add(T entity)
+    {
+        entity.Active = true;
+        entity.CreatedById = 1;
+        entity.CreatedTime = DateTime.UtcNow;
+        DbContext.Add(entity);
+    }
 
-    public virtual void Update(T entity) => DbContext.Update(entity);
+    public virtual void Update(T entity)
+    {
+        entity.UpdatedById = 1;
+        entity.UpdatedTime = DateTime.UtcNow;
+        DbContext.Update(entity);
+    }
 
     public virtual void DeleteAsync(T entity) => DbContext.Set<T>().Remove(entity);
 }

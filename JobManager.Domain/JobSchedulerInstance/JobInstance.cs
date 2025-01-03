@@ -14,9 +14,6 @@ public class JobInstance:Entity
         JobId = jobId;
         Status = status;
         JobStepInstances = new();
-        CreatedById = 1;
-        CreatedTime = DateTime.UtcNow;
-        Active = true;
     }
 
     public long JobId {  get; private set; }
@@ -41,5 +38,10 @@ public class JobInstance:Entity
         if (jobStepInstance == null)
             throw new ArgumentNullException(nameof(jobStepInstance));
         JobStepInstances.Remove(jobStepInstance);
+    }
+
+    public void UpdateStatus(Status status)
+    {
+        Status = status;
     }
 }

@@ -6,12 +6,12 @@ BEGIN
     GRANT ALL ON SCHEMA public TO public;
 END $$;
 
-DO $$ 
+DO $$
 BEGIN
     CREATE TYPE "JobType" AS ENUM ('None','Onetime','Recurring');
 END $$;
 
-DO $$ 
+DO $$
 BEGIN
     CREATE TYPE "RecurringType" AS ENUM (
         'None',
@@ -21,8 +21,8 @@ BEGIN
         'Weekly',
         'Monthly');
 END $$;
-    
-DO $$ 
+
+DO $$
 BEGIN
     IF EXISTS (SELECT 1 FROM pg_tables WHERE tablename = 'job_config') THEN
         DROP TABLE "job_config";
@@ -34,11 +34,12 @@ BEGIN
         "created_time" TIMESTAMPTZ NOT NULL,
         "updated_time" TIMESTAMPTZ NULL,
         "created_by_id" BIGINT NOT NULL,
-        "updated_by_id" BIGINT NULL
+        "updated_by_id" BIGINT NULL,
+        "row_version" bytea NOT NULL DEFAULT gen_random_bytes(16)
     );
 END $$;
 
-DO $$ 
+DO $$
 BEGIN
     IF EXISTS (SELECT 1 FROM pg_tables WHERE tablename = 'job') THEN
         DROP TABLE "job";
@@ -48,16 +49,17 @@ BEGIN
         "effective_date_time" TIMESTAMP NOT NULL,
         "description" TEXT,
         "type" VARCHAR(50) NOT NULL,
-        "recurring_type" VARCHAR(50),
+        "cron_expression" VARCHAR(50),
         "active" BOOLEAN NOT NULL,
         "created_time" TIMESTAMPTZ NOT NULL,
         "updated_time" TIMESTAMPTZ NULL,
         "created_by_id" BIGINT NOT NULL,
-        "updated_by_id" BIGINT NULL
+        "updated_by_id" BIGINT NULL,
+        "row_version" bytea NOT NULL DEFAULT gen_random_bytes(16)
     );
 END $$;
 
-DO $$ 
+DO $$
 BEGIN
     IF EXISTS (SELECT 1 FROM pg_tables WHERE tablename = 'job_step') THEN
         DROP TABLE "job_step";
@@ -72,17 +74,18 @@ BEGIN
         "updated_time" TIMESTAMPTZ NULL,
         "created_by_id" BIGINT NOT NULL,
         "updated_by_id" BIGINT NULL,
+        "row_version" bytea NOT NULL DEFAULT gen_random_bytes(16),
         FOREIGN KEY ("job_id") REFERENCES "job"("id"),
         FOREIGN KEY ("job_config_id") REFERENCES "job_config"("id")
     );
 END $$;
 
-DO $$ 
+DO $$
 BEGIN
     CREATE TYPE "Status" AS ENUM ('NotStarted','Running','Completed','CompletedWithErrors','Faulted');
 END $$;
 
-DO $$ 
+DO $$
 BEGIN
     IF EXISTS (SELECT 1 FROM pg_tables WHERE tablename = 'job_instance') THEN
         DROP TABLE "job_instance";
@@ -96,11 +99,12 @@ BEGIN
         "updated_time" TIMESTAMPTZ NULL,
         "created_by_id" BIGINT NOT NULL,
         "updated_by_id" BIGINT NULL,
+        "row_version" bytea NOT NULL DEFAULT gen_random_bytes(16),
         FOREIGN KEY ("job_id") REFERENCES "job"("id")
     );
 END $$;
 
-DO $$ 
+DO $$
 BEGIN
     IF EXISTS (SELECT 1 FROM pg_tables WHERE tablename = 'job_step_instance') THEN
         DROP TABLE "job_step_instance";
@@ -117,11 +121,12 @@ BEGIN
         "updated_time" TIMESTAMPTZ NULL,
         "created_by_id" BIGINT NOT NULL,
         "updated_by_id" BIGINT NULL,
+        "row_version" bytea NOT NULL DEFAULT gen_random_bytes(16),
         FOREIGN KEY ("job_instance_id") REFERENCES "job_instance"("id")
     );
 END $$;
 
-DO $$ 
+DO $$
 BEGIN
     IF EXISTS (SELECT 1 FROM pg_tables WHERE tablename = 'job_step_instance_log') THEN
         DROP TABLE "job_step_instance_log";
@@ -135,6 +140,7 @@ BEGIN
         "updated_time" TIMESTAMPTZ NULL,
         "created_by_id" BIGINT NOT NULL,
         "updated_by_id" BIGINT NULL,
+        "row_version" bytea NOT NULL DEFAULT gen_random_bytes(16),
         FOREIGN KEY ("job_step_instance_id") REFERENCES "job_step_instance"("id")
     );
 END $$;

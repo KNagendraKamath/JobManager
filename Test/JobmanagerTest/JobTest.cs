@@ -24,12 +24,7 @@ public class JobTest
             EffectiveDateTime = DateTime.UtcNow,
             Description = "Sample Job",
             Type = JobType.Recurring,
-            RecurringType = RecurringType.Daily,
-            Active = true,
-            CreatedTime = DateTime.UtcNow,
-            UpdatedTime = DateTime.UtcNow,
-            CreatedById = 1,
-            UpdatedById = 1
+            RecurringType = RecurringType.Daily
         }; 
 
         long id = await jobRepository.AddAsync(job);

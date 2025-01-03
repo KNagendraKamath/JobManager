@@ -11,9 +11,6 @@ public class JobDbContext : DbContext,IUnitOfWork
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        //modelBuilder.HasPostgresEnum<JobType>();
-        //modelBuilder.HasPostgresEnum<RecurringType>();
-
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(JobDbContext).Assembly);
     }
 

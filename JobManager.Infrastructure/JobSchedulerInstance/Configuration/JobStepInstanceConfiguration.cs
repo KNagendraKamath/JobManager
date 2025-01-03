@@ -1,12 +1,14 @@
 ﻿using JobManager.Domain.JobSchedulerInstance;
+using JobManager.Infrastructure.Abstractions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace JobManager.Infrastructure.JobSchedulerInstance.Configuration;
-internal class JobStepInstanceConfiguration : IEntityTypeConfiguration<JobStepInstance>
+internal class JobStepInstanceConfiguration : BaseConfiguration<JobStepInstance>//IEntityTypeConfiguration<JobStepInstance>
 {
-    public void Configure(EntityTypeBuilder<JobStepInstance> builder)
+    public override void ConfigureBuilder(EntityTypeBuilder<JobStepInstance> builder)
     {
+
         builder.ToTable("job_step_instance");
 
         builder.Property(j => j.Status)

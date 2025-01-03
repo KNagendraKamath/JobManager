@@ -22,12 +22,19 @@ internal class CreateJobCommandHandler : ICommandHandler<CreateJobCommand, long>
 
     public async Task<Result<long>> Handle(CreateJobCommand request, CancellationToken cancellationToken)
     {
+        DateTime effectiveDateTime = request.EffectiveDateTime.AddMinutes(1);
         Job job = Job.Create(request.Description,
-                             request.EffectiveDateTime,
-                             request.JobType,
-                             request.RecurringType,
-                             CronExpressionBuilder(request.EffectiveDateTime, request.JobType, request.RecurringType),
-                             request.CreatedById);
+                             effectiveDateTime,
+                             request.JobType);
+
+        if (request.JobType == JobType.Recurring && request.RecurringDetail is not null)
+            job.SetRecurringDetail(new Domain.JobSetup.RecurringDetail(job,
+                                                                      request.RecurringDetail.RecurringType,
+                                                                      request.RecurringDetail.Second,
+                                                                      request.RecurringDetail.Minutes,
+                                                                      request.RecurringDetail.Hours,
+                                                                      request.RecurringDetail.DayOfWeek,
+                                                                      request.RecurringDetail.Day));
 
         foreach (Step step in request.JobSteps)
         {
@@ -44,22 +51,5 @@ internal class CreateJobCommandHandler : ICommandHandler<CreateJobCommand, long>
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         return job.Id;
-    }
-
-    private string CronExpressionBuilder(DateTime effectiveDateTime, JobType jobType, RecurringType recurringType)
-    {
-        if (jobType == JobType.Onetime)
-            return $"{effectiveDateTime.Minute} {effectiveDateTime.Hour} {effectiveDateTime.Day} {effectiveDateTime.Month} ? {effectiveDateTime.Year}";
-        
-        //For recurring jobs, generate the appropriate cron expression based on the recurring type
-        return recurringType switch
-        {
-            RecurringType.EveryMinute => "0 * * * * ?",
-            RecurringType.EverySecond => "* * * * * ?",
-            RecurringType.Daily => $"{effectiveDateTime.Minute} {effectiveDateTime.Hour} * * ?",
-            RecurringType.Weekly => $"{effectiveDateTime.Minute} {effectiveDateTime.Hour} ? * {effectiveDateTime.DayOfWeek.ToString().Substring(0, 3).ToUpper()}",
-            RecurringType.Monthly => $"{effectiveDateTime.Minute} {effectiveDateTime.Hour} {effectiveDateTime.Day} * ?",
-            _ => throw new NotImplementedException($"Recurring type {recurringType} is not supported")
-        };
     }
 }

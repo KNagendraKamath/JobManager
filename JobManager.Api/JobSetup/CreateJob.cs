@@ -16,9 +16,8 @@ internal static class CreateJob
             Result<long> result = await sender.Send(new CreateJobCommand(request.Description,
                                                                          request.EffectiveDateTime,
                                                                          request.JobType,
-                                                                         request.RecurringType,
-                                                                         request.JobSteps,
-                                                                         request.CreatedById));
+                                                                         request.RecurringDetail,
+                                                                         request.JobSteps));
 
             if (result!.IsFailure) return ApiStatus.Failure(result);
 
@@ -27,20 +26,23 @@ internal static class CreateJob
         });
     }
 
-    internal class Request
+    internal sealed class Request
     {
         public string? Description { get; set; }
         public DateTime EffectiveDateTime { get; set; }
 
         [JsonConverter(typeof(JsonStringEnumConverter))]
-        public JobType JobType { get; set; }=JobType.None;
+        public JobType JobType { get; set; }
 
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public RecurringType RecurringType { get; set; }=RecurringType.None;
+        public Application.JobSetup.CreateJob.RecurringDetail? RecurringDetail { get; set; }
 
         public List<Step> JobSteps { get; set; }
         public long CreatedById { get; set; }
     }
+
+ 
+
+
 
 
 }

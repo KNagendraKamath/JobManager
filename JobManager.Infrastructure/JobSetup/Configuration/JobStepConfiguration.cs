@@ -1,11 +1,12 @@
 ﻿using JobManager.Domain.JobSetup;
+using JobManager.Infrastructure.Abstractions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace JobManager.Infrastructure.JobSetup.Configuration;
-internal class JobStepConfiguration : IEntityTypeConfiguration<JobStep>
+internal class JobStepConfiguration : BaseConfiguration<JobStep>
 {
-    public void Configure(EntityTypeBuilder<JobStep> builder)
+    public override void ConfigureBuilder(EntityTypeBuilder<JobStep> builder)
     {
         builder.ToTable("job_step");
 
@@ -18,5 +19,6 @@ internal class JobStepConfiguration : IEntityTypeConfiguration<JobStep>
             .HasForeignKey(jobStep => jobStep.JobId);
 
         builder.HasOne(jobStep => jobStep.JobConfig);
+
     }
 }

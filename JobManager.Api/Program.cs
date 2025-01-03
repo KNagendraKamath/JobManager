@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using JobManager.Api;
 using JobManager.Api.Middleware;
 using JobManager.Application;
@@ -12,6 +13,11 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
+
+builder.Services.ConfigureHttpJsonOptions(options =>
+{
+    options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
+});
 
 WebApplication app = builder.Build();
 

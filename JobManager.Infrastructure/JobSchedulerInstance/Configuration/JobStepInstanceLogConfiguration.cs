@@ -1,11 +1,12 @@
 ﻿using JobManager.Domain.JobSchedulerInstance;
+using JobManager.Infrastructure.Abstractions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace JobManager.Infrastructure.JobSchedulerInstance.Configuration;
-internal class JobStepInstanceLogConfiguration : IEntityTypeConfiguration<JobStepInstanceLog>
+internal class JobStepInstanceLogConfiguration :BaseConfiguration<JobStepInstanceLog>
 {
-    public void Configure(EntityTypeBuilder<JobStepInstanceLog> builder)
+    public override void ConfigureBuilder(EntityTypeBuilder<JobStepInstanceLog> builder)
     {
         builder.ToTable("job_step_instance_log");
         builder.HasKey(j => j.Id);
