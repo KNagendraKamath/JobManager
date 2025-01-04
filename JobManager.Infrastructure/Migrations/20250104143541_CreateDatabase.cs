@@ -40,6 +40,7 @@ namespace JobManager.Infrastructure.Migrations
                     id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     name = table.Column<string>(type: "text", nullable: false),
+                    assembly = table.Column<string>(type: "text", nullable: false),
                     xmin = table.Column<uint>(type: "xid", rowVersion: true, nullable: false),
                     created_time = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     updated_time = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),

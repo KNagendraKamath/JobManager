@@ -17,7 +17,7 @@ internal abstract class Repository<T>
     {
         return await DbContext
             .Set<T>()
-            .FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
+            .FindAsync(id, cancellationToken);
     }
 
     public virtual void Add(T entity)
@@ -35,5 +35,15 @@ internal abstract class Repository<T>
         DbContext.Update(entity);
     }
 
-    public virtual void DeleteAsync(T entity) => DbContext.Set<T>().Remove(entity);
+    public virtual async Task DeactivateAsync(long Id,CancellationToken cancellationToken=default)
+    {
+        T entity = await GetByIdAsync(Id,cancellationToken);
+        if (entity is null)
+            return;
+
+        entity.Active = false;
+        entity.UpdatedById = 1;
+        entity.UpdatedTime = DateTime.UtcNow;
+        DbContext.Update(entity);
+    }
 }

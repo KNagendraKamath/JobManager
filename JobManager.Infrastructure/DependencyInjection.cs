@@ -5,7 +5,6 @@ using JobManager.Domain.JobSchedulerInstance;
 using JobManager.Domain.JobSetup;
 using JobManager.Infrastructure.Abstractions;
 using JobManager.Infrastructure.JobSchedulerInstance;
-using JobManager.Infrastructure.JobSchedulerInstance.Scheduler;
 using JobManager.Infrastructure.JobSetup;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -13,7 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Quartz.Impl;
 using Quartz;
-using Quartz.Spi;
+using JobManager.Infrastructure.JobSchedulerInstance.Scheduler;
 
 namespace JobManager.Infrastructure;
 
@@ -27,18 +26,26 @@ public static class DependencyInjection
         AddRepository(services, configuration);
         AddScheduler(services);
 
+     
         return services;
     }
 
+
     private static void AddScheduler(IServiceCollection services)
     {
-        services.AddQuartz();
-        services.AddQuartzHostedService(opt =>
-        {
-            opt.WaitForJobsToComplete = true;
-        });
-        services.AddSingleton<IJobFactory, JobFactory>();
-        services.AddSingleton<ISchedulerFactory, StdSchedulerFactory>();
+      
+        services.AddQuartz(q=> q.AddJob<QuartzScheduler>(configure => configure.WithIdentity("QuartzScheduler"))
+            .AddTrigger(configure =>
+                     configure
+                    .ForJob("QuartzScheduler")
+                    .StartNow()
+                    .WithSimpleSchedule(schedule =>
+                        schedule.WithIntervalInSeconds(60).RepeatForever())));
+
+        services.AddQuartzHostedService(options => options.WaitForJobsToComplete = true); 
+
+        services.AddSingleton<IJobScheduler,QuartzScheduler>();
+
     }
 
     private static IServiceCollection AddRepository(IServiceCollection services, IConfiguration configuration)

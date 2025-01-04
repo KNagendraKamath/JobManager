@@ -1,0 +1,15 @@
+[
+  {
+    "Name": "New Profile",
+    "Projects": [
+      {
+        "Path": "JobManager.Api\\JobManager.Api.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "JobRunner\\JobRunner.csproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]

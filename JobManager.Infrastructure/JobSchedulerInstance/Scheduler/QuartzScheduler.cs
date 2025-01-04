@@ -2,109 +2,110 @@
 using JobManager.Domain.Abstractions;
 using JobManager.Domain.JobSetup;
 using MediatR;
-using Microsoft.Extensions.Hosting;
 using Quartz.Impl.Matchers;
 using Quartz;
-using JobManager.Infrastructure.Abstractions;
+using Microsoft.Extensions.Logging;
+using JobManager.Domain.JobSchedulerInstance;
 
 namespace JobManager.Infrastructure.JobSchedulerInstance.Scheduler;
-public class QuartzScheduler : BackgroundService
+
+[DisallowConcurrentExecution]
+internal class QuartzScheduler : IJob,IJobScheduler
 {
-    private ISchedulerFactory SchedulerFactory { get; set; } = ServiceLocator.GetInstance<ISchedulerFactory>();
-    private IScheduler Scheduler { get; set; } 
-    private ISender Sender { get; set; } = ServiceLocator.GetInstance<ISender>();
-    private Timer _timer;
+    private readonly ISchedulerFactory SchedulerFactory;
+    private IScheduler Scheduler { get; set; }
+    private readonly ISender Sender;
+    private readonly ILogger<QuartzScheduler> _logger;
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+   public QuartzScheduler(ISchedulerFactory schedulerFactory, ISender sender, ILogger<QuartzScheduler> logger)
     {
-        Scheduler = await SchedulerFactory.GetScheduler(stoppingToken);
+        SchedulerFactory = schedulerFactory;
+        Sender = sender;
+        _logger = logger;
+    }
 
-        StartPollingDatabase(stoppingToken);
-        while (!stoppingToken.IsCancellationRequested)
-            await Task.Delay(1000, stoppingToken);
-
+    public async Task Execute(IJobExecutionContext context)
+    {
+        Scheduler = await SchedulerFactory.GetScheduler(context.CancellationToken);
+        await ScheduleJobsFromDatabase(context.CancellationToken);
     }
 
     private async Task ScheduleJobsFromDatabase(CancellationToken cancellationToken)
     {
-        try
+
+        IReadOnlyCollection<JobKey> jobKeys = await Scheduler.GetJobKeys(GroupMatcher<JobKey>.AnyGroup(), cancellationToken);
+        string scheduledJobIds = string.Join(",", jobKeys.Where(j => !j.Group.Contains("DEFAULT")).Select(j => j.Group));
+
+        Result<List<JobResponse>> jobsToBeScheduled = await Sender.Send(new GetPendingOneTimeAndRecurringJobQuery(scheduledJobIds), cancellationToken);
+
+        foreach (JobResponse jobResponse in jobsToBeScheduled.Value ?? new())
         {
-            IReadOnlyCollection<JobKey> jobKeys = await Scheduler.GetJobKeys(GroupMatcher<JobKey>.AnyGroup(), cancellationToken);
-            string scheduledJobIds = string.Join(",", jobKeys.Select(j => j.Group));
+            string? cronExpression = CronExpressionGenerator(jobResponse.RecurringType,
+                                                                         jobResponse.Second,
+                                                                         jobResponse.Minute,
+                                                                         jobResponse.Hour,
+                                                                         jobResponse.Day,
+                                                                         jobResponse.DayOfWeek);
 
-            Result<List<JobResponse>> jobsToBeScheduled = await Sender.Send(new GetPendingOneTimeAndRecurringJobQuery(scheduledJobIds), cancellationToken);
-
-            Dictionary<long, CronScheduleBuilder> JobCrons = (from job in (jobsToBeScheduled.Value ?? new())
-                                                              group job.RecurringDetail by job.JobId into jobGroup
-                                                              let cronExpression = CronExpressionGenerator(jobGroup.FirstOrDefault())
-                                                              select new
-                                                              {
-                                                                  JobId = jobGroup.Key,
-                                                                  CronExpression = cronExpression
-                                                              }).ToDictionary(j => j.JobId, j => j.CronExpression);
-
-            foreach (JobResponse jobResponse in jobsToBeScheduled.Value ?? new())
+            jobResponse.Steps.ForEach(async step =>
             {
-                Type jobClass = Type.GetType(jobResponse.JobConfigName)!;
-
-                IJobDetail job = JobBuilder.Create(jobClass)
-                                    .WithIdentity($"{jobResponse.JobStepId}", $"{jobResponse.JobId}")
-                                    .UsingJobData("jsonParameter", jobResponse.JsonParameter)
-                                    .Build();
-
-                TriggerBuilder triggerBuilder = TriggerBuilder.Create()
-                                       .WithIdentity($"{jobResponse.JobStepId}", $"{jobResponse.JobId}")
-                                       .StartAt(jobResponse.EffectiveDateTime);
-
-                CronScheduleBuilder cronExpression = JobCrons[jobResponse.JobId];
-                if (cronExpression is not null)
-                    triggerBuilder.WithSchedule(cronExpression);
-                
-
-                await Scheduler.ScheduleJob(job, triggerBuilder.Build(), cancellationToken);
-            }
+                await ScheduleAsync(jobResponse.JobId,
+                               step.JobStepId,
+                               step.JobConfigName,
+                               step.JsonParameter,
+                               jobResponse.EffectiveDateTime,
+                               cronExpression,
+                               cancellationToken);
+            });
         }
-        catch (Exception ex)
-        {
-        }
+
     }
 
-    private CronScheduleBuilder CronExpressionGenerator(RecurringDetailResponse? recurringDetail)
+
+    private string CronExpressionGenerator(RecurringType? recurringType, int? second, int? minute, int? hour, int? day, DayOfWeek? dayOfWeek)
     {
-        if (recurringDetail is null)
+        if (recurringType is null)
             return null;
 
-        return recurringDetail.RecurringType switch
+        return recurringType switch
         {
-            RecurringType.EveryNoSecond => CronScheduleBuilder.CronSchedule($"0/{recurringDetail.Second ?? 0} * * * * ? *"),
-            RecurringType.EveryNoMinute => CronScheduleBuilder.CronSchedule($"0 0/{recurringDetail.Minutes ?? 0} * 1/1 * ? *"),
-            RecurringType.Daily => CronScheduleBuilder.DailyAtHourAndMinute(recurringDetail.Hours ?? 0, recurringDetail.Minutes ?? 0),
-            RecurringType.Weekly => CronScheduleBuilder.WeeklyOnDayAndHourAndMinute(
-                                        (DayOfWeek)Enum.Parse(typeof(DayOfWeek),
-                                                    recurringDetail.DayOfWeek.ToString()!,
-                                                    true),
-                                        recurringDetail.Hours ?? 0,
-                                        recurringDetail.Minutes ?? 0),
-            RecurringType.Monthly => CronScheduleBuilder.MonthlyOnDayAndHourAndMinute(
-                recurringDetail.Day ?? 0, recurringDetail.Hours ?? 0, recurringDetail.Minutes ?? 0),
-            _ => throw new NotImplementedException($"Recurring type {recurringDetail.RecurringType} is not supported")
+            RecurringType.EveryNoSecond => $"0/{second ?? 1} * * * * ?", // Every N seconds
+            RecurringType.EveryNoMinute => $"{second ?? 0} 0/{minute ?? 1} * * * ?", // Every N minutes
+            RecurringType.Daily => $"{second??0} {minute ?? 0} {hour ?? 0} * * ?", // Every day at a specific time
+            RecurringType.Weekly => $"{second ?? 0} {minute ?? 0} {hour ?? 0} ? * {dayOfWeek?.ToString().ToUpper().Substring(0, 3)}", // Every week on a specific day and time
+            RecurringType.Monthly => $"{second ?? 0} {minute ?? 0} {hour ?? 0} {day ?? 1} * ?", // Every month on a specific day and time
+            _ => throw new NotImplementedException($"Recurring type {recurringType} is not supported")
         };
     }
 
-    private void StartPollingDatabase(CancellationToken cancellationToken)
+    public async Task ScheduleAsync(long GroupId,
+                         long StepId,
+                         string JobName,
+                         string JsonParameter,
+                         DateTime EffectiveDateTime,
+                         string? CronExpression=default,
+                         CancellationToken cancellationToken=default)
     {
-        TimeSpan pollingInterval = TimeSpan.FromMinutes(1); // Adjust as needed
-        _timer = new Timer(async _ => await ScheduleJobsFromDatabase(cancellationToken),
-                           null,
-                           TimeSpan.Zero,
-                           pollingInterval);
+        IJobDetail job = JobBuilder.Create(Type.GetType(JobName)!)
+        .WithIdentity($"{StepId}", $"{GroupId}")
+                                      .UsingJobData("jsonParameter", JsonParameter)
+                                      .Build();
+        TriggerBuilder triggerBuilder = TriggerBuilder.Create()
+        .WithIdentity($"{StepId}", $"{GroupId}")
+                               .StartAt(EffectiveDateTime);
 
+        if (CronExpression is not null)
+            triggerBuilder.WithCronSchedule(CronExpression);
+
+        await Scheduler.ScheduleJob(job, triggerBuilder.Build(), cancellationToken);
     }
 
-    public override async Task StopAsync(CancellationToken cancellationToken)
+    public async Task UnSchedule(long GroupId, IEnumerable<long> StepId)
     {
-        _timer?.Change(Timeout.Infinite, 0); // Stop the timer
-        await Scheduler.Shutdown(cancellationToken);
-        await base.StopAsync(cancellationToken);
+        if (StepId.Any())
+        {
+            JobKey[] jobsToDelete = StepId.Select(stepId => new JobKey($"{stepId}", $"{GroupId}")).ToArray();
+            await Scheduler.DeleteJobs(jobsToDelete);
+        }
     }
 }

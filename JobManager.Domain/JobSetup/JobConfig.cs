@@ -6,4 +6,5 @@ public class JobConfig:Entity
 {
     private JobConfig() { }
     public string Name { get; init; }
+    public string Assembly { get; init; }
 }

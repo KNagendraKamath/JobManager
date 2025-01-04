@@ -263,6 +263,11 @@ namespace JobManager.Infrastructure.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("active");
 
+                    b.Property<string>("Assembly")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("assembly");
+
                     b.Property<long>("CreatedById")
                         .HasColumnType("bigint")
                         .HasColumnName("created_by_id");

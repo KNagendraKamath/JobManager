@@ -20,6 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Job.ProjectLayer\Job.ProjectLayer.csproj" />
     <ProjectReference Include="..\JobManager.Application\JobManager.Application.csproj" />
     <ProjectReference Include="..\JobManager.Infrastructure\JobManager.Infrastructure.csproj" />
   </ItemGroup>

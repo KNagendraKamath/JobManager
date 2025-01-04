@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace JobManager.Infrastructure.Migrations
 {
     [DbContext(typeof(JobDbContext))]
-    [Migration("20250102080103_CreateDatabase")]
+    [Migration("20250104143541_CreateDatabase")]
     partial class CreateDatabase
     {
         /// <inheritdoc />
@@ -265,6 +265,11 @@ namespace JobManager.Infrastructure.Migrations
                     b.Property<bool>("Active")
                         .HasColumnType("boolean")
                         .HasColumnName("active");
+
+                    b.Property<string>("Assembly")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("assembly");
 
                     b.Property<long>("CreatedById")
                         .HasColumnType("bigint")

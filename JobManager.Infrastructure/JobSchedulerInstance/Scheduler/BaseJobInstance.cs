@@ -3,20 +3,27 @@ using JobManager.Application.JobSchedulerInstance.CreateJobInstance;
 using JobManager.Application.JobSchedulerInstance.UpdateJobInstance;
 using JobManager.Domain.Abstractions;
 using JobManager.Domain.JobSchedulerInstance;
-using JobManager.Infrastructure.Abstractions;
 using MediatR;
+using Microsoft.Extensions.DependencyInjection;
 using Quartz;
 
 namespace JobManager.Infrastructure.JobSchedulerInstance.Scheduler;
 
+[DisallowConcurrentExecution]
 public abstract class BaseJobInstance<TParameter>:IJob
 {
-    private ISender Sender { get; set; } = ServiceLocator.GetInstance<ISender>();
+    public BaseJobInstance(IServiceProvider serviceProvider)
+    {
+        Sender = serviceProvider.GetRequiredService<ISender>();
+    }
+    private readonly ISender Sender;
 
     protected TParameter? Parameter { get; private set; }
 
     public async Task Execute(IJobExecutionContext context)
     {
+       
+
         long jobId = Convert.ToInt64(context.JobDetail.Key.Group);
         long jobStepId = Convert.ToInt64(context.JobDetail.Key.Name);
 

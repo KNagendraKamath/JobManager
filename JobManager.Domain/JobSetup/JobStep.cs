@@ -20,4 +20,6 @@ public class JobStep:Entity
     public long JobConfigId { get; private set; }
     public JobConfig JobConfig { get; private set;}
     public string JsonParameter { get; private set; }
+
+   
 }
