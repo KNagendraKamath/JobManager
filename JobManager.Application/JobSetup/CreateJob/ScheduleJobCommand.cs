@@ -4,12 +4,12 @@ using JobManager.Domain.JobSetup;
 
 namespace JobManager.Application.JobSetup.CreateJob;
 
-public record CreateJobCommand(
+public record ScheduleJobCommand(
     string? Description,
     DateTime EffectiveDateTime,
     JobType JobType,
-    RecurringDetail? RecurringDetail,
-    List<Step> JobSteps) : ICommand<long>;
+    List<Step> JobSteps,
+    RecurringDetail? RecurringDetail = default) : ICommand<long>;
 
 public record Step(string JobName,string JsonParameter);
 
@@ -27,9 +27,19 @@ public record RecurringDetail
 
     public int Day { get; set; }
 
-    public RecurringDetail()
+    public RecurringDetail(RecurringType recurringType,
+                           int? second,
+                           int? minute,
+                           int? hour,
+                           int? day,
+                           DayOfWeek? dayOfWeek)
     {
-
+        RecurringType = recurringType;
+        Second = second??0;
+        Minutes = minute??0;
+        Hours = hour??0;
+        Day = day??1;
+        DayOfWeek = dayOfWeek??DayOfWeek.Sunday;
     }
 }
 

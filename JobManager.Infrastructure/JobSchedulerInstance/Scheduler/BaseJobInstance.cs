@@ -23,7 +23,6 @@ public abstract class BaseJobInstance<TParameter>:IJob
     public async Task Execute(IJobExecutionContext context)
     {
        
-
         long jobId = Convert.ToInt64(context.JobDetail.Key.Group);
         long jobStepId = Convert.ToInt64(context.JobDetail.Key.Name);
 

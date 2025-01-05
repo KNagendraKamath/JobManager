@@ -7,17 +7,17 @@ using MediatR;
 
 namespace JobManager.Api.JobSetup;
 
-internal static class CreateJob
+internal static class ScheduleJob
 {
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPost("job", async (Request request, ISender sender) =>
+        app.MapPost("ScheduleJob", async (ScheduleJobRequest request, ISender sender) =>
         {
-            Result<long> result = await sender.Send(new CreateJobCommand(request.Description,
+            Result<long> result = await sender.Send(new ScheduleJobCommand(request.Description,
                                                                          request.EffectiveDateTime,
                                                                          request.JobType,
-                                                                         request.RecurringDetail,
-                                                                         request.JobSteps));
+                                                                         request.JobSteps,
+                                                                         request.RecurringDetail));
 
             if (result!.IsFailure) return ApiStatus.Failure(result);
 
@@ -26,7 +26,7 @@ internal static class CreateJob
         });
     }
 
-    internal sealed class Request
+    internal sealed record ScheduleJobRequest
     {
         public string? Description { get; set; }
         public DateTime EffectiveDateTime { get; set; }
@@ -37,8 +37,7 @@ internal static class CreateJob
         public Application.JobSetup.CreateJob.RecurringDetail? RecurringDetail { get; set; }
 
         public List<Step> JobSteps { get; set; }
-        public long CreatedById { get; set; }
-    }
+  }
 
  
 

@@ -33,6 +33,7 @@ internal sealed class GetPendingOneTimeAndRecurringJobQueryHandler : IQueryHandl
                  recurring_detail.day_of_week As DayOfWeek,
                  recurring_detail.day As Day,
                  job_step.id AS JobStepId,
+                 job_config.name AS JobConfigName,
                  job_config.Assembly AS Assembly,
                  job_step.json_parameter As JsonParameter
              FROM job
@@ -46,7 +47,7 @@ internal sealed class GetPendingOneTimeAndRecurringJobQueryHandler : IQueryHandl
             	 	 ON recurring_detail.job_id = job.id
                  LEFT JOIN LATERAL 
                      (
-                    	SELECT unnest(string_to_array(@ScheduledJobIdsInCsv, ','))::BIGINT AS Id
+                    	SELECT unnest(string_to_array(@AlreadyScheduledJobIdsInCsv, ','))::BIGINT AS Id
                      ) AS jobs_scheduled ON job.id = jobs_scheduled.Id
              WHERE jobs_scheduled.Id IS NULL;
             """;
@@ -60,7 +61,7 @@ internal sealed class GetPendingOneTimeAndRecurringJobQueryHandler : IQueryHandl
                                   job.Steps.Add(step);
                                   return job;
                               },
-                           new { request.ScheduledJobIdsInCsv },
+                           new { request.AlreadyScheduledJobIdsInCsv },
                            splitOn: "JobStepId"
                         )
                 ).ToList();

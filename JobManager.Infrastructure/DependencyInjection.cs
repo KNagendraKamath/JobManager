@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using JobManager.Application.Abstractions.Database;
+﻿using JobManager.Application.Abstractions.Database;
 using JobManager.Domain.Abstractions;
 using JobManager.Domain.JobSchedulerInstance;
 using JobManager.Domain.JobSetup;
@@ -9,8 +8,6 @@ using JobManager.Infrastructure.JobSetup;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Quartz.Impl;
 using Quartz;
 using JobManager.Infrastructure.JobSchedulerInstance.Scheduler;
 
@@ -56,8 +53,8 @@ public static class DependencyInjection
         services.AddDbContext<JobDbContext>(options =>
         {
             options.UseNpgsql(connectionString)
-                   .UseSnakeCaseNamingConvention()
-                   .LogTo(message => Debug.WriteLine(message), LogLevel.Trace);
+                   .UseSnakeCaseNamingConvention();
+                  // .LogTo(message => Debug.WriteLine(message), LogLevel.Trace);
         });
 
         services.AddScoped<IJobConfigRepository, JobConfigRepository>();

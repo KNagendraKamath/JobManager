@@ -34,9 +34,9 @@ internal class QuartzScheduler : IJob,IJobScheduler
     {
 
         IReadOnlyCollection<JobKey> jobKeys = await Scheduler.GetJobKeys(GroupMatcher<JobKey>.AnyGroup(), cancellationToken);
-        string scheduledJobIds = string.Join(",", jobKeys.Where(j => !j.Group.Contains("DEFAULT")).Select(j => j.Group));
+        string alreadyScheduledJobIds = string.Join(",", jobKeys.Where(j => !j.Group.Contains("DEFAULT")).Select(j => j.Group));
 
-        Result<List<JobResponse>> jobsToBeScheduled = await Sender.Send(new GetPendingOneTimeAndRecurringJobQuery(scheduledJobIds), cancellationToken);
+        Result<List<JobResponse>> jobsToBeScheduled = await Sender.Send(new GetPendingOneTimeAndRecurringJobQuery(alreadyScheduledJobIds), cancellationToken);
 
         foreach (JobResponse jobResponse in jobsToBeScheduled.Value ?? new())
         {
@@ -51,7 +51,7 @@ internal class QuartzScheduler : IJob,IJobScheduler
             {
                 await ScheduleAsync(jobResponse.JobId,
                                step.JobStepId,
-                               step.JobConfigName,
+                               step.Assembly,
                                step.JsonParameter,
                                jobResponse.EffectiveDateTime,
                                cronExpression,
@@ -80,13 +80,21 @@ internal class QuartzScheduler : IJob,IJobScheduler
 
     public async Task ScheduleAsync(long GroupId,
                          long StepId,
-                         string JobName,
+                         string Assembly,
                          string JsonParameter,
                          DateTime EffectiveDateTime,
                          string? CronExpression=default,
                          CancellationToken cancellationToken=default)
     {
-        IJobDetail job = JobBuilder.Create(Type.GetType(JobName)!)
+        Type jobAssembly = Type.GetType(Assembly);
+
+        if (jobAssembly is null)
+        {
+            _logger.LogError($"Job assembly {Assembly} not found");
+            return;
+        }
+
+        IJobDetail job = JobBuilder.Create(jobAssembly)
         .WithIdentity($"{StepId}", $"{GroupId}")
                                       .UsingJobData("jsonParameter", JsonParameter)
                                       .Build();

@@ -1,5 +1,4 @@
 ﻿using JobManager.Infrastructure.JobSchedulerInstance.Scheduler;
-using Microsoft.Extensions.Logging;
 namespace Job.ProjectLayer;
 
 public class Test : BaseJobInstance<TestParam>

@@ -1,6 +1,4 @@
-﻿using System;
-using JobManager.Domain.Abstractions;
-using Microsoft.EntityFrameworkCore;
+﻿using JobManager.Domain.Abstractions;
 
 namespace JobManager.Infrastructure.Abstractions;
 
@@ -22,9 +20,6 @@ internal abstract class Repository<T>
 
     public virtual void Add(T entity)
     {
-        entity.Active = true;
-        entity.CreatedById = 1;
-        entity.CreatedTime = DateTime.UtcNow;
         DbContext.Add(entity);
     }
 

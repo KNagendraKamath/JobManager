@@ -1,8 +1,6 @@
 using System.Text.Json.Serialization;
 using JobManager.Api;
 using JobManager.Api.Middleware;
-using JobManager.Application;
-using JobManager.Infrastructure;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -11,8 +9,7 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddApplication();
-builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddDependencies(builder.Configuration);
 
 builder.Services.ConfigureHttpJsonOptions(options =>
 {
@@ -34,3 +31,6 @@ app.UseHttpsRedirection();
 Endpoints.MapEndpoints(app);
 
 await app.RunAsync();
+
+public partial class Program { }
+

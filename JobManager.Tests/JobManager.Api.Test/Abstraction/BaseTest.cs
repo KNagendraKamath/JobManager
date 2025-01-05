@@ -1,9 +1,9 @@
 ﻿namespace JobManager.Api.Test.Abstraction;
-internal class BaseTest: IClassFixture<BaseTestWebAppFactory>
+public abstract class BaseTest: IClassFixture<BaseTestWebAppFactory>
 {
     protected readonly HttpClient HttpClient;
 
-    protected BaseTest(BaseTestWebAppFactory factory)
+    public BaseTest(BaseTestWebAppFactory factory)
     {
         HttpClient = factory.CreateClient();
     }

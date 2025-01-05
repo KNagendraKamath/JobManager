@@ -1,5 +1,4 @@
-﻿using System.Text.Json.Serialization;
-using JobManager.Domain.Abstractions;
+﻿using JobManager.Domain.Abstractions;
 
 namespace JobManager.Domain.JobSetup;
 

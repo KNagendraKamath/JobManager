@@ -5,13 +5,13 @@ using JobManager.Domain.JobSetup;
 
 namespace JobManager.Application.JobSetup.CreateJob;
 
-internal class CreateJobCommandHandler : ICommandHandler<CreateJobCommand, long>
+internal class ScheduleJobCommandHandler : ICommandHandler<ScheduleJobCommand, long>
 {
     private readonly IJobRepository _jobRepository;
     private readonly IJobConfigRepository _jobConfigRepository;
     private readonly IUnitOfWork _unitOfWork;
 
-    public CreateJobCommandHandler(IJobRepository jobRepository,
+    public ScheduleJobCommandHandler(IJobRepository jobRepository,
                                    IUnitOfWork unitOfWork,
                                    IJobConfigRepository jobConfigRepository)
     {
@@ -20,7 +20,7 @@ internal class CreateJobCommandHandler : ICommandHandler<CreateJobCommand, long>
         _jobConfigRepository = jobConfigRepository;
     }
 
-    public async Task<Result<long>> Handle(CreateJobCommand request, CancellationToken cancellationToken)
+    public async Task<Result<long>> Handle(ScheduleJobCommand request, CancellationToken cancellationToken)
     {
         DateTime effectiveDateTime = request.EffectiveDateTime.AddMinutes(1);
         Job job = Job.Create(request.Description,
