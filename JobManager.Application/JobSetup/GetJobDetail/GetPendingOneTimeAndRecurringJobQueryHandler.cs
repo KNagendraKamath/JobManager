@@ -49,7 +49,10 @@ internal sealed class GetPendingOneTimeAndRecurringJobQueryHandler : IQueryHandl
                      (
                     	SELECT unnest(string_to_array(@AlreadyScheduledJobIdsInCsv, ','))::BIGINT AS Id
                      ) AS jobs_scheduled ON job.id = jobs_scheduled.Id
-             WHERE jobs_scheduled.Id IS NULL;
+                LEFT JOIN job_Instance
+            	    on job.id = job_instance.job_id 
+                    and job.type = 'Onetime'
+             WHERE jobs_scheduled.Id IS NULL and job_instance.Id is null;
             """;
 
         

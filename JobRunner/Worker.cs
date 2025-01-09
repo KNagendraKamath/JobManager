@@ -1,16 +1,37 @@
-using JobManager.Application.JobSetup.GetJobDetail;
-using JobManager.Domain.Abstractions;
-using JobManager.Domain.JobSetup;
-using JobManager.Infrastructure.JobSchedulerInstance.Scheduler;
-using MediatR;
-using Quartz;
-using Quartz.Impl.Matchers;
+using JobManager.Domain.JobSchedulerInstance;
 
 namespace JobRunner;
 
-public class Worker : QuartzScheduler
+public class Worker : BackgroundService
 {
-    public Worker(ISchedulerFactory schedulerFactory, ISender sender, ILogger<QuartzScheduler> logger) : base(schedulerFactory, sender, logger)
+    private readonly IJobScheduler _scheduler;
+
+    public Worker(IJobScheduler scheduler)
     {
+        _scheduler = scheduler;
+    }
+
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        StartPollingDatabase(stoppingToken);
+
+        while (!stoppingToken.IsCancellationRequested)
+            await Task.Delay(1000, stoppingToken);
+    }
+
+
+    private void StartPollingDatabase(CancellationToken cancellationToken)
+    {
+        TimeSpan pollingInterval = TimeSpan.FromMinutes(1); // Adjust as needed
+        Timer timer = new Timer(async _ => await _scheduler.ExecuteAsync(cancellationToken),
+                                null,
+                                TimeSpan.Zero,
+                                pollingInterval);
+    }
+
+    public override async Task StopAsync(CancellationToken cancellationToken)
+    {
+        await base.StopAsync(cancellationToken);
     }
 }
+

@@ -9,10 +9,8 @@ public class JobDbContext : DbContext,IUnitOfWork
 {
     public JobDbContext(DbContextOptions<JobDbContext> options) : base(options) { }
 
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
+    protected override void OnModelCreating(ModelBuilder modelBuilder) => 
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(JobDbContext).Assembly);
-    }
 
     public DbSet<JobConfig> JobConfigs { get; set; }
     public DbSet<Job> Jobs { get; set; }

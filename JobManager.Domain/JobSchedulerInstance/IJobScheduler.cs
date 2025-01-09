@@ -10,4 +10,6 @@ public interface IJobScheduler
                   CancellationToken cancellationToken = default);
 
     Task UnSchedule(long GroupId,IEnumerable<long> StepId);
+
+    Task ExecuteAsync(CancellationToken cancellationToken = default);
 }

@@ -1,8 +1,7 @@
-﻿using Job.ProjectLayer;
-using JobManager.Application;
+﻿using JobManager.Application;
 using JobManager.Infrastructure;
 
-namespace JobManager.Api;
+namespace JobRunner;
 
 public static class DependencyInjection
 {
@@ -12,7 +11,6 @@ public static class DependencyInjection
     {
         services.AddApplication();
         services.AddInfrastructure(configuration);
-        services.AddProjectJob();
         return services;
     }
 }

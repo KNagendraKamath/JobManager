@@ -9,43 +9,44 @@ using JobManager.Domain.JobSchedulerInstance;
 
 namespace JobManager.Infrastructure.JobSchedulerInstance.Scheduler;
 
-[DisallowConcurrentExecution]
-internal class QuartzScheduler : IJob,IJobScheduler
+internal class QuartzScheduler : IJobScheduler
 {
     private readonly ISchedulerFactory SchedulerFactory;
     private IScheduler Scheduler { get; set; }
     private readonly ISender Sender;
     private readonly ILogger<QuartzScheduler> _logger;
 
-   public QuartzScheduler(ISchedulerFactory schedulerFactory, ISender sender, ILogger<QuartzScheduler> logger)
+   public QuartzScheduler(ISchedulerFactory schedulerFactory,
+                          ISender sender,
+                          ILogger<QuartzScheduler> logger)
     {
         SchedulerFactory = schedulerFactory;
         Sender = sender;
         _logger = logger;
     }
 
-    public async Task Execute(IJobExecutionContext context)
+    public async Task ExecuteAsync(CancellationToken cancellationToken)
     {
-        Scheduler = await SchedulerFactory.GetScheduler(context.CancellationToken);
-        await ScheduleJobsFromDatabase(context.CancellationToken);
+        Scheduler = await SchedulerFactory.GetScheduler(cancellationToken);
+        await ScheduleJobsFromDatabase(cancellationToken);
     }
 
     private async Task ScheduleJobsFromDatabase(CancellationToken cancellationToken)
     {
-
         IReadOnlyCollection<JobKey> jobKeys = await Scheduler.GetJobKeys(GroupMatcher<JobKey>.AnyGroup(), cancellationToken);
-        string alreadyScheduledJobIds = string.Join(",", jobKeys.Where(j => !j.Group.Contains("DEFAULT")).Select(j => j.Group));
+        //string alreadyScheduledJobIds = string.Join(",", jobKeys.Where(j => !j.Group.Contains("DEFAULT")).Select(j => j.Group));
+        string alreadyScheduledJobIds = string.Join(",", jobKeys.Select(j => j.Group));
 
         Result<List<JobResponse>> jobsToBeScheduled = await Sender.Send(new GetPendingOneTimeAndRecurringJobQuery(alreadyScheduledJobIds), cancellationToken);
 
         foreach (JobResponse jobResponse in jobsToBeScheduled.Value ?? new())
         {
             string? cronExpression = CronExpressionGenerator(jobResponse.RecurringType,
-                                                                         jobResponse.Second,
-                                                                         jobResponse.Minute,
-                                                                         jobResponse.Hour,
-                                                                         jobResponse.Day,
-                                                                         jobResponse.DayOfWeek);
+                                                             jobResponse.Second,
+                                                             jobResponse.Minute,
+                                                             jobResponse.Hour,
+                                                             jobResponse.Day,
+                                                             jobResponse.DayOfWeek);
 
             jobResponse.Steps.ForEach(async step =>
             {
@@ -95,11 +96,12 @@ internal class QuartzScheduler : IJob,IJobScheduler
         }
 
         IJobDetail job = JobBuilder.Create(jobAssembly)
-        .WithIdentity($"{StepId}", $"{GroupId}")
-                                      .UsingJobData("jsonParameter", JsonParameter)
-                                      .Build();
+                                   .WithIdentity($"{StepId}", $"{GroupId}")
+                                   .UsingJobData("jsonParameter", JsonParameter)
+                                   .Build();
+
         TriggerBuilder triggerBuilder = TriggerBuilder.Create()
-        .WithIdentity($"{StepId}", $"{GroupId}")
+                                .WithIdentity($"{StepId}", $"{GroupId}")
                                .StartAt(EffectiveDateTime);
 
         if (CronExpression is not null)
