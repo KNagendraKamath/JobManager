@@ -14,34 +14,29 @@ public abstract class BaseJobInstance<TParameter>:IJob
 {
     public BaseJobInstance(IServiceProvider serviceProvider)
     {
-        Sender = serviceProvider.GetRequiredService<ISender>();
+        _sender = serviceProvider.GetRequiredService<ISender>();
     }
-    private readonly ISender Sender;
+    private readonly ISender _sender;
 
     protected TParameter? Parameter { get; private set; }
 
     public async Task Execute(IJobExecutionContext context)
     {
-       
         long jobId = Convert.ToInt64(context.JobDetail.Key.Group);
         long jobStepId = Convert.ToInt64(context.JobDetail.Key.Name);
 
-        Result<long> jobInstanceResult = (await Sender.Send(new CreateJobInstanceCommand(jobId)));
+        Result<long> jobInstanceResult = await _sender.Send(new CreateJobInstanceCommand(jobId));
 
         //TODO: log the error (gracefully handle the use case)
-        if (jobInstanceResult.IsFailure)
-            return;
+        if (jobInstanceResult.IsFailure) return;
 
         long jobInstanceId = jobInstanceResult.Value;
-
-        Result<long> jobStepInstanceResult = await Sender.Send(new CreateJobStepInstanceCommand(jobInstanceId, jobStepId));
+        Result<long> jobStepInstanceResult = await _sender.Send(new CreateJobStepInstanceCommand(jobInstanceId, jobStepId));
 
         //TODO: log the error (gracefully handle the use case)
-        if (jobStepInstanceResult.IsFailure)
-            return;
+        if (jobStepInstanceResult.IsFailure) return;
 
-        long jobStepInstanceId = jobInstanceResult.Value;
-
+        long jobStepInstanceId = jobStepInstanceResult.Value;
         await UpdateInstanceStatus(jobInstanceId, jobStepInstanceId,Status.Running);
 
         try
@@ -54,7 +49,7 @@ public abstract class BaseJobInstance<TParameter>:IJob
         catch (Exception ex)
         {
             await UpdateInstanceStatus(jobInstanceId, jobStepInstanceId, Status.CompletedWithErrors);
-            await Sender.Send(new LogJobStepInstanceCommand(jobStepInstanceId, ex.Message));
+            await _sender.Send(new LogJobStepInstanceCommand(jobStepInstanceId, ex.Message));
         }
     }
 
@@ -64,18 +59,11 @@ public abstract class BaseJobInstance<TParameter>:IJob
         await UpdateJobInstanceStatus(jobInstanceId, status);
     }
 
-    private async Task UpdateJobInstanceStatus(long jobInstanceId, Status status)
-    {
-        await Sender.Send(new UpdateJobInstanceStatusCommand(jobInstanceId, status));
-    }
+    private async Task UpdateJobInstanceStatus(long jobInstanceId, Status status) => 
+        await _sender.Send(new UpdateJobInstanceStatusCommand(jobInstanceId, status));
 
-    private async Task UpdateJobStepInstanceStatus(long jobStepInstanceId,Status status)
-    {
-        await Sender.Send(new UpdateJobStepInstanceStatusCommand(jobStepInstanceId, Status.Running, DateTimeOffset.Now));
-    }
+    private async Task UpdateJobStepInstanceStatus(long jobStepInstanceId, Status status) => 
+        await _sender.Send(new UpdateJobStepInstanceStatusCommand(jobStepInstanceId, Status.Running, DateTimeOffset.Now));
 
     public abstract Task Execute();
-
-
-
 }

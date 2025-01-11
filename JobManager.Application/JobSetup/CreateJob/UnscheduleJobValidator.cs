@@ -1,6 +1,5 @@
 ﻿using FluentValidation;
 using JobManager.Domain.JobSetup;
-using MediatR;
 
 namespace JobManager.Application.JobSetup.CreateJob;
 internal class UnscheduleJobValidator:AbstractValidator<UnscheduleJobCommand>

@@ -34,7 +34,6 @@ internal class QuartzScheduler : IJobScheduler
     private async Task ScheduleJobsFromDatabase(CancellationToken cancellationToken)
     {
         IReadOnlyCollection<JobKey> jobKeys = await Scheduler.GetJobKeys(GroupMatcher<JobKey>.AnyGroup(), cancellationToken);
-        //string alreadyScheduledJobIds = string.Join(",", jobKeys.Where(j => !j.Group.Contains("DEFAULT")).Select(j => j.Group));
         string alreadyScheduledJobIds = string.Join(",", jobKeys.Select(j => j.Group));
 
         Result<List<JobResponse>> jobsToBeScheduled = await Sender.Send(new GetPendingOneTimeAndRecurringJobQuery(alreadyScheduledJobIds), cancellationToken);
@@ -61,7 +60,6 @@ internal class QuartzScheduler : IJobScheduler
         }
 
     }
-
 
     private string CronExpressionGenerator(RecurringType? recurringType, int? second, int? minute, int? hour, int? day, DayOfWeek? dayOfWeek)
     {

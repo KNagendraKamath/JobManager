@@ -21,7 +21,10 @@ internal sealed class UnscheduleCommandHandler : ICommandHandler<UnscheduleJobCo
     {
         Job job = await _jobRepository.GetByIdAsync(request.JobId, cancellationToken);
 
-        IEnumerable<long> jobStepIds = GetJobStepIds(request.JobName, job!);
+        if (job is null)
+            return Result.Failure(Error.NotFound("NotFound", "Job not found"));
+
+        IEnumerable<long> jobStepIds = GetJobStepIds(request.JobName, job);
 
         if (jobStepIds.Any()) return Result.Failure(Error.NotFound("NotFound", $"Job step {request.JobName} in Job with Id: {request.JobId} not found"));
 
