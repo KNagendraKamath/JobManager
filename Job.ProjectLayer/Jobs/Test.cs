@@ -1,14 +1,8 @@
-﻿using JobManager.Infrastructure.JobSchedulerInstance.Scheduler;
+﻿using JobManager.Infrastructure.JobSchedulerInstance.Scheduler.Quartz;
 namespace Job.ProjectLayer;
 
 public class Test : BaseJobInstance<TestParam>
 {
-  
-    public Test(IServiceProvider serviceProvider) : base(serviceProvider)
-    {
-        
-    }
-
     public override Task Execute()
     {
       

@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Quartz;
-using JobManager.Infrastructure.JobSchedulerInstance.Scheduler;
+using JobManager.Infrastructure.JobSchedulerInstance.Scheduler.Quartz;
 
 namespace JobManager.Infrastructure;
 
@@ -30,7 +30,7 @@ public static class DependencyInjection
     {
         services.AddQuartz();
         services.AddQuartzHostedService(options => options.WaitForJobsToComplete = true); 
-        services.AddSingleton<IJobScheduler,QuartzScheduler>();
+        services.AddSingleton<IJobScheduler,Scheduler>();
     }
 
     private static IServiceCollection AddRepository(IServiceCollection services, IConfiguration configuration)

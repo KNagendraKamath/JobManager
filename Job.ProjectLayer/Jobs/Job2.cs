@@ -1,4 +1,4 @@
-﻿using JobManager.Infrastructure.JobSchedulerInstance.Scheduler;
+﻿using JobManager.Infrastructure.JobSchedulerInstance.Scheduler.Quartz;
 using Microsoft.Extensions.Logging;
 
 namespace Job.ProjectLayer;
@@ -6,7 +6,7 @@ public class Job2 : BaseJobInstance<Job2Param>
 {
     private readonly ILogger<Job2> _logger;
 
-    public Job2(IServiceProvider serviceProvider, ILogger<Job2> logger) : base(serviceProvider)
+    public Job2(ILogger<Job2> logger) 
     {
         _logger = logger;
     }

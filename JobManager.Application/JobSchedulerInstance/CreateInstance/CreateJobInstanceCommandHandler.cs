@@ -18,8 +18,7 @@ internal sealed class CreateJobInstanceCommandHandler : ICommandHandler<CreateJo
     async Task<Result<long>> IRequestHandler<CreateJobInstanceCommand, Result<long>>.Handle(CreateJobInstanceCommand request, CancellationToken cancellationToken)
     {
         JobInstance jobInstance = JobInstance.Create(request.JobId,Status.NotStarted);
-         _jobInstanceRepository.Add(jobInstance);
-        await _unitofWork.SaveChangesAsync(cancellationToken);
+        await _jobInstanceRepository.AddAsync(jobInstance);
         return jobInstance.Id;
     }
 }

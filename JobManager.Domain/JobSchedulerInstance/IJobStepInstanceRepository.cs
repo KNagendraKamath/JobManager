@@ -2,6 +2,6 @@
 
 public interface IJobStepInstanceRepository
 {
-    void Update(JobStepInstance jobStepInstance);
+    Task<bool> UpdateAsync(JobStepInstance jobStepInstance);
     Task<JobStepInstance?> GetByIdAsync(long Id, CancellationToken cancellationToken);
 }

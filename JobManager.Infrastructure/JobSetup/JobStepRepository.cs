@@ -1,11 +1,10 @@
 ﻿using JobManager.Domain.JobSetup;
-using JobManager.Infrastructure.Abstractions;
 
 namespace JobManager.Infrastructure.JobSetup;
 
-internal sealed class JobStepRepository : Repository<JobStep>, IJobStepRepository
+internal sealed class JobStepRepository : IJobStepRepository
 {
-    public JobStepRepository(JobDbContext dbContext) : base(dbContext)
+    public JobStepRepository() 
     {
     }
 }

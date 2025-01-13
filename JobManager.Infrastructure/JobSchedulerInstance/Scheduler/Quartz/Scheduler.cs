@@ -7,36 +7,36 @@ using Quartz;
 using Microsoft.Extensions.Logging;
 using JobManager.Domain.JobSchedulerInstance;
 
-namespace JobManager.Infrastructure.JobSchedulerInstance.Scheduler;
+namespace JobManager.Infrastructure.JobSchedulerInstance.Scheduler.Quartz;
 
-internal class QuartzScheduler : IJobScheduler
+internal class Scheduler : IJobScheduler
 {
-    private readonly ISchedulerFactory SchedulerFactory;
-    private IScheduler Scheduler { get; set; }
-    private readonly ISender Sender;
-    private readonly ILogger<QuartzScheduler> _logger;
+    private readonly ISchedulerFactory _schedulerFactory;
+    private IScheduler _scheduler;
+    private readonly ISender _sender;
+    private readonly ILogger<Scheduler> _logger;
 
-   public QuartzScheduler(ISchedulerFactory schedulerFactory,
-                          ISender sender,
-                          ILogger<QuartzScheduler> logger)
+    public Scheduler(ISchedulerFactory schedulerFactory,
+                           ISender sender,
+                           ILogger<Scheduler> logger)
     {
-        SchedulerFactory = schedulerFactory;
-        Sender = sender;
+        _schedulerFactory = schedulerFactory;
+        _sender = sender;
         _logger = logger;
     }
 
     public async Task ExecuteAsync(CancellationToken cancellationToken)
     {
-        Scheduler = await SchedulerFactory.GetScheduler(cancellationToken);
+        _scheduler = await _schedulerFactory.GetScheduler(cancellationToken);
         await ScheduleJobsFromDatabase(cancellationToken);
     }
 
     private async Task ScheduleJobsFromDatabase(CancellationToken cancellationToken)
     {
-        IReadOnlyCollection<JobKey> jobKeys = await Scheduler.GetJobKeys(GroupMatcher<JobKey>.AnyGroup(), cancellationToken);
+        IReadOnlyCollection<JobKey> jobKeys = await _scheduler.GetJobKeys(GroupMatcher<JobKey>.AnyGroup(), cancellationToken);
         string alreadyScheduledJobIds = string.Join(",", jobKeys.Select(j => j.Group));
 
-        Result<List<JobResponse>> jobsToBeScheduled = await Sender.Send(new GetPendingOneTimeAndRecurringJobQuery(alreadyScheduledJobIds), cancellationToken);
+        Result<List<JobResponse>> jobsToBeScheduled = await _sender.Send(new GetPendingOneTimeAndRecurringJobQuery(alreadyScheduledJobIds), cancellationToken);
 
         foreach (JobResponse jobResponse in jobsToBeScheduled.Value ?? new())
         {
@@ -70,7 +70,7 @@ internal class QuartzScheduler : IJobScheduler
         {
             RecurringType.EveryNoSecond => $"0/{second ?? 1} * * * * ?", // Every N seconds
             RecurringType.EveryNoMinute => $"{second ?? 0} 0/{minute ?? 1} * * * ?", // Every N minutes
-            RecurringType.Daily => $"{second??0} {minute ?? 0} {hour ?? 0} * * ?", // Every day at a specific time
+            RecurringType.Daily => $"{second ?? 0} {minute ?? 0} {hour ?? 0} * * ?", // Every day at a specific time
             RecurringType.Weekly => $"{second ?? 0} {minute ?? 0} {hour ?? 0} ? * {dayOfWeek?.ToString().ToUpper().Substring(0, 3)}", // Every week on a specific day and time
             RecurringType.Monthly => $"{second ?? 0} {minute ?? 0} {hour ?? 0} {day ?? 1} * ?", // Every month on a specific day and time
             _ => throw new NotImplementedException($"Recurring type {recurringType} is not supported")
@@ -82,8 +82,8 @@ internal class QuartzScheduler : IJobScheduler
                          string Assembly,
                          string JsonParameter,
                          DateTime EffectiveDateTime,
-                         string? CronExpression=default,
-                         CancellationToken cancellationToken=default)
+                         string? CronExpression = default,
+                         CancellationToken cancellationToken = default)
     {
         Type jobAssembly = Type.GetType(Assembly);
 
@@ -105,7 +105,7 @@ internal class QuartzScheduler : IJobScheduler
         if (CronExpression is not null)
             triggerBuilder.WithCronSchedule(CronExpression);
 
-        await Scheduler.ScheduleJob(job, triggerBuilder.Build(), cancellationToken);
+        await _scheduler.ScheduleJob(job, triggerBuilder.Build(), cancellationToken);
     }
 
     public async Task UnSchedule(long GroupId, IEnumerable<long> StepId)
@@ -113,7 +113,7 @@ internal class QuartzScheduler : IJobScheduler
         if (StepId.Any())
         {
             JobKey[] jobsToDelete = StepId.Select(stepId => new JobKey($"{stepId}", $"{GroupId}")).ToArray();
-            await Scheduler.DeleteJobs(jobsToDelete);
+            await _scheduler.DeleteJobs(jobsToDelete);
         }
     }
 }
