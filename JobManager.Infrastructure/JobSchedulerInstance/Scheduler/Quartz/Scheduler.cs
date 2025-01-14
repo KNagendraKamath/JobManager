@@ -6,6 +6,7 @@ using Quartz.Impl.Matchers;
 using Quartz;
 using Microsoft.Extensions.Logging;
 using JobManager.Domain.JobSchedulerInstance;
+using Quartz.Listener;
 
 namespace JobManager.Infrastructure.JobSchedulerInstance.Scheduler.Quartz;
 
@@ -28,11 +29,7 @@ internal class Scheduler : IJobScheduler
     public async Task ExecuteAsync(CancellationToken cancellationToken)
     {
         _scheduler = await _schedulerFactory.GetScheduler(cancellationToken);
-        await ScheduleJobsFromDatabase(cancellationToken);
-    }
-
-    private async Task ScheduleJobsFromDatabase(CancellationToken cancellationToken)
-    {
+      
         IReadOnlyCollection<JobKey> jobKeys = await _scheduler.GetJobKeys(GroupMatcher<JobKey>.AnyGroup(), cancellationToken);
         string alreadyScheduledJobIds = string.Join(",", jobKeys.Select(j => j.Group));
 
@@ -40,25 +37,65 @@ internal class Scheduler : IJobScheduler
 
         foreach (JobResponse jobResponse in jobsToBeScheduled.Value ?? new())
         {
-            string? cronExpression = CronExpressionGenerator(jobResponse.RecurringType,
-                                                             jobResponse.Second,
-                                                             jobResponse.Minute,
-                                                             jobResponse.Hour,
-                                                             jobResponse.Day,
-                                                             jobResponse.DayOfWeek);
-
-            jobResponse.Steps.ForEach(async step =>
-            {
-                await ScheduleAsync(jobResponse.JobId,
-                               step.JobStepId,
-                               step.Assembly,
-                               step.JsonParameter,
-                               jobResponse.EffectiveDateTime,
-                               cronExpression,
-                               cancellationToken);
-            });
+            List<IJobDetail> jobDetails = CreateJobDetails(jobResponse);
+            ConfigureJobChainListener(jobResponse.JobId, jobDetails);
+            TriggerBuilder triggerBuilder = GenerateTrigger(jobResponse);
+            await _scheduler.ScheduleJob(jobDetails.First(), triggerBuilder.Build(), cancellationToken);
         }
+    }
 
+    private void ConfigureJobChainListener(long JobId, List<IJobDetail> jobDetails)
+    {
+        if (jobDetails.Count > 1)
+        {
+            JobChainingJobListener listener = new JobChainingJobListener("jobChainListener");
+            for (int i = 0; i < jobDetails.Count - 1; i++)
+            {
+                IJobDetail firstJob = jobDetails[i];
+                IJobDetail secondJob = jobDetails[i + 1];
+                listener.AddJobChainLink(firstJob.Key, secondJob.Key);
+            }
+            _scheduler.ListenerManager.AddJobListener(listener, GroupMatcher<JobKey>.GroupEquals($"{JobId}"));
+        }
+    }
+
+    private List<IJobDetail> CreateJobDetails(JobResponse jobResponse)
+    {
+        List<IJobDetail> jobDetails = new();
+
+        jobResponse.Steps.ForEach(step =>
+        {
+            Type jobAssembly = Type.GetType(step.Assembly);
+
+            if (jobAssembly is null)
+                throw new InvalidProgramException($"Job assembly {step.Assembly} not found");
+
+            jobDetails.Add(JobBuilder.Create(jobAssembly)
+                                       .WithIdentity($"{step.JobStepId}", $"{jobResponse.JobId}")
+                                       .UsingJobData("jsonParameter", step.JsonParameter)
+                                       .Build());
+        });
+
+        return jobDetails;
+    }
+
+    private TriggerBuilder GenerateTrigger(JobResponse jobResponse)
+    {
+        TriggerBuilder triggerBuilder = TriggerBuilder.Create()
+                                                   .WithIdentity($"{jobResponse.JobId}")
+                                                   .StartAt(jobResponse.EffectiveDateTime);
+
+        string? cronExpression = CronExpressionGenerator(jobResponse.RecurringType,
+                                                      jobResponse.Second,
+                                                      jobResponse.Minute,
+                                                      jobResponse.Hour,
+                                                      jobResponse.Day,
+                                                      jobResponse.DayOfWeek);
+
+        if (cronExpression is not null)
+            triggerBuilder.WithCronSchedule(cronExpression);
+
+        return triggerBuilder;
     }
 
     private string CronExpressionGenerator(RecurringType? recurringType, int? second, int? minute, int? hour, int? day, DayOfWeek? dayOfWeek)
@@ -75,37 +112,6 @@ internal class Scheduler : IJobScheduler
             RecurringType.Monthly => $"{second ?? 0} {minute ?? 0} {hour ?? 0} {day ?? 1} * ?", // Every month on a specific day and time
             _ => throw new NotImplementedException($"Recurring type {recurringType} is not supported")
         };
-    }
-
-    public async Task ScheduleAsync(long GroupId,
-                         long StepId,
-                         string Assembly,
-                         string JsonParameter,
-                         DateTime EffectiveDateTime,
-                         string? CronExpression = default,
-                         CancellationToken cancellationToken = default)
-    {
-        Type jobAssembly = Type.GetType(Assembly);
-
-        if (jobAssembly is null)
-        {
-            _logger.LogError($"Job assembly {Assembly} not found");
-            return;
-        }
-
-        IJobDetail job = JobBuilder.Create(jobAssembly)
-                                   .WithIdentity($"{StepId}", $"{GroupId}")
-                                   .UsingJobData("jsonParameter", JsonParameter)
-                                   .Build();
-
-        TriggerBuilder triggerBuilder = TriggerBuilder.Create()
-                                .WithIdentity($"{StepId}", $"{GroupId}")
-                               .StartAt(EffectiveDateTime);
-
-        if (CronExpression is not null)
-            triggerBuilder.WithCronSchedule(CronExpression);
-
-        await _scheduler.ScheduleJob(job, triggerBuilder.Build(), cancellationToken);
     }
 
     public async Task UnSchedule(long GroupId, IEnumerable<long> StepId)

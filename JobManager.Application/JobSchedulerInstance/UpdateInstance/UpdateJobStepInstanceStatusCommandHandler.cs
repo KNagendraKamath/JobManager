@@ -9,12 +9,12 @@ internal class UpdateJobStepInstanceStatusCommandHandler : ICommandHandler<Updat
     private readonly IJobStepInstanceRepository _jobStepInstanceRepository;
     private readonly IJobInstanceRepository _jobInstanceRepository;
     private readonly IJobRepository _jobRepository;
-    private readonly IUnitOfWork _unitOfWork;
 
-    public UpdateJobStepInstanceStatusCommandHandler(IJobStepInstanceRepository jobStepInstanceRepository, IUnitOfWork unitOfWork, IJobInstanceRepository jobInstanceRepository, IJobRepository jobRepository)
+    public UpdateJobStepInstanceStatusCommandHandler(IJobStepInstanceRepository jobStepInstanceRepository,
+                                                     IJobInstanceRepository jobInstanceRepository,
+                                                     IJobRepository jobRepository)
     {
         _jobStepInstanceRepository = jobStepInstanceRepository;
-        _unitOfWork = unitOfWork;
         _jobInstanceRepository = jobInstanceRepository;
         _jobRepository = jobRepository;
     }
@@ -30,8 +30,6 @@ internal class UpdateJobStepInstanceStatusCommandHandler : ICommandHandler<Updat
 
         if (request.Status == Status.Completed)
             jobStepInstance.SetEndTime(DateTimeOffset.UtcNow);
-
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.Success();
     }

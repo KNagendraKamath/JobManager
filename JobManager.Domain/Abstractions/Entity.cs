@@ -1,4 +1,6 @@
-﻿namespace JobManager.Domain.Abstractions;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace JobManager.Domain.Abstractions;
 
 public abstract class Entity
 {
@@ -14,6 +16,8 @@ public abstract class Entity
     public long CreatedById { get; set; }
     public long? UpdatedById { get; set; }
     public bool Active { get; set; }
+
+    public uint RowVersion { get; init; }
 
     public virtual void Deactivate()
     {

@@ -7,12 +7,10 @@ namespace JobManager.Application.JobSchedulerInstance.CreateJobInstance;
 internal sealed class CreateJobInstanceCommandHandler : ICommandHandler<CreateJobInstanceCommand,long>
 {
     private readonly IJobInstanceRepository _jobInstanceRepository;
-    private readonly IUnitOfWork _unitofWork;
 
-    public CreateJobInstanceCommandHandler(IJobInstanceRepository jobInstanceRepository, IUnitOfWork unitofWork)
+    public CreateJobInstanceCommandHandler(IJobInstanceRepository jobInstanceRepository)
     {
         _jobInstanceRepository = jobInstanceRepository;
-        _unitofWork = unitofWork;
     }
 
     async Task<Result<long>> IRequestHandler<CreateJobInstanceCommand, Result<long>>.Handle(CreateJobInstanceCommand request, CancellationToken cancellationToken)

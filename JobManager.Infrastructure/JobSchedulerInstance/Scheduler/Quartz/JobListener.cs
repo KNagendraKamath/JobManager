@@ -6,6 +6,7 @@ using MediatR;
 using Quartz;
 
 namespace JobManager.Infrastructure.JobSchedulerInstance.Scheduler.Quartz;
+
 internal class JobListener : IJobListener
 {
     public JobListener(ISender sender)
@@ -13,6 +14,8 @@ internal class JobListener : IJobListener
         _sender = sender;
     }
     private readonly ISender _sender;
+    private long JobId { get; set; }
+    private long JobStepId { get; set; }
     private long JobInstanceId { get; set; }
     private long JobStepInstanceId { get; set; }
 
@@ -20,17 +23,25 @@ internal class JobListener : IJobListener
 
     public Task JobExecutionVetoed(IJobExecutionContext context, CancellationToken cancellationToken = default)
     {
+        
         throw new NotImplementedException();
     }
 
     public async Task JobToBeExecuted(IJobExecutionContext context, CancellationToken cancellationToken = default)
     {
-        long jobId = Convert.ToInt64(context.JobDetail.Key.Group);
-        long jobStepId = Convert.ToInt64(context.JobDetail.Key.Name);
+        JobId = Convert.ToInt64(context.JobDetail.Key.Group);
+        JobStepId = Convert.ToInt64(context.JobDetail.Key.Name);
+        bool jobInstanceCreated=context.MergedJobDataMap.TryGetLong("JobInstanceId", out long _jobInstanceId);
+        JobInstanceId = _jobInstanceId;
 
-        Result<long> jobInstanceResult = await _sender.Send(new CreateJobInstanceCommand(jobId), cancellationToken);
-        JobInstanceId = jobInstanceResult.Value;
-        Result<long> jobStepInstanceResult = await _sender.Send(new CreateJobStepInstanceCommand(JobInstanceId, jobStepId));
+        if (!jobInstanceCreated)
+        {
+            Result<long> jobInstanceResult = await _sender.Send(new CreateJobInstanceCommand(JobId), cancellationToken);
+            JobInstanceId = jobInstanceResult.Value;
+            context.MergedJobDataMap.Put("JobInstanceId", JobInstanceId);
+        }
+        
+        Result<long> jobStepInstanceResult = await _sender.Send(new CreateJobStepInstanceCommand(JobInstanceId, JobStepId));
 
         JobStepInstanceId = jobStepInstanceResult.Value;
         await UpdateInstanceStatus(JobInstanceId, JobStepInstanceId, Status.Running);
@@ -44,8 +55,9 @@ internal class JobListener : IJobListener
         {
             await UpdateInstanceStatus(JobInstanceId, JobStepInstanceId, Status.CompletedWithErrors);
             await _sender.Send(new LogJobStepInstanceCommand(JobStepInstanceId, jobException.Message));
+            return;
         }
-        await UpdateInstanceStatus(JobInstanceId, JobStepInstanceId, Status.Completed);
+        await UpdateJobStepInstanceStatus(JobStepInstanceId, Status.Completed);
     }
 
     private async Task UpdateInstanceStatus(long jobInstanceId,

@@ -7,13 +7,11 @@ namespace JobManager.Application.JobSetup.CreateJob;
 internal sealed class UnscheduleCommandHandler : ICommandHandler<UnscheduleJobCommand>
 {
     private readonly IJobRepository _jobRepository;
-    private readonly IUnitOfWork _unitOfWork;
     private readonly IJobScheduler _jobScheduler;
 
-    public UnscheduleCommandHandler(IJobRepository jobRepository, IUnitOfWork unitOfWork, IJobScheduler jobScheduler)
+    public UnscheduleCommandHandler(IJobRepository jobRepository, IJobScheduler jobScheduler)
     {
         _jobRepository = jobRepository;
-        _unitOfWork = unitOfWork;
         _jobScheduler = jobScheduler;
     }
 
@@ -30,7 +28,6 @@ internal sealed class UnscheduleCommandHandler : ICommandHandler<UnscheduleJobCo
 
         DeactivateJobSteps(job, jobStepIds);
 
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
         await _jobScheduler.UnSchedule(request.JobId, jobStepIds);
 
         return Result.Success();

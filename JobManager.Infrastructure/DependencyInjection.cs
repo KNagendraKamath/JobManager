@@ -10,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Quartz;
 using JobManager.Infrastructure.JobSchedulerInstance.Scheduler.Quartz;
+using Quartz.Impl.Matchers;
 
 namespace JobManager.Infrastructure;
 
@@ -28,7 +29,7 @@ public static class DependencyInjection
 
     private static void AddScheduler(IServiceCollection services)
     {
-        services.AddQuartz();
+        services.AddQuartz(q=> q.AddJobListener<JobListener>(GroupMatcher<JobKey>.AnyGroup()));
         services.AddQuartzHostedService(options => options.WaitForJobsToComplete = true); 
         services.AddSingleton<IJobScheduler,Scheduler>();
     }
@@ -38,12 +39,12 @@ public static class DependencyInjection
         string connectionString = configuration.GetConnectionString("Database") ??
                                        throw new ArgumentNullException(nameof(configuration));
 
-        services.AddDbContext<JobDbContext>(options =>
-        {
-            options.UseNpgsql(connectionString)
-                   .UseSnakeCaseNamingConvention();
-                  // .LogTo(message => Debug.WriteLine(message), LogLevel.Trace);
-        });
+        //services.AddDbContext<JobDbContext>(options =>
+        //{
+        //    options.UseNpgsql(connectionString)
+        //           .UseSnakeCaseNamingConvention();
+        //          // .LogTo(message => Debug.WriteLine(message), LogLevel.Trace);
+        //});
 
         services.AddScoped<IJobConfigRepository, JobConfigRepository>();
         services.AddScoped<IJobRepository, JobRepository>();
@@ -52,7 +53,7 @@ public static class DependencyInjection
         services.AddScoped<IJobStepInstanceRepository, JobStepInstanceRepository>();
         services.AddScoped<IJobStepInstanceLogRepository, JobStepInstanceLogRepository>();
 
-        services.AddScoped<IUnitOfWork>(s => s.GetRequiredService<JobDbContext>());
+        //services.AddScoped<IUnitOfWork>(s => s.GetRequiredService<JobDbContext>());
 
         services.AddSingleton<ISqlConnectionFactory>(_ =>
             new SqlConnectionFactory(connectionString));

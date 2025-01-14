@@ -1,10 +1,4 @@
 ﻿using System.Text.Json;
-using JobManager.Application.JobSchedulerInstance.CreateJobInstance;
-using JobManager.Application.JobSchedulerInstance.UpdateJobInstance;
-using JobManager.Domain.Abstractions;
-using JobManager.Domain.JobSchedulerInstance;
-using MediatR;
-using Microsoft.Extensions.DependencyInjection;
 using Quartz;
 
 namespace JobManager.Infrastructure.JobSchedulerInstance.Scheduler.Quartz;

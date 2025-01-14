@@ -9,14 +9,11 @@ internal class ScheduleJobCommandHandler : ICommandHandler<ScheduleJobCommand, l
 {
     private readonly IJobRepository _jobRepository;
     private readonly IJobConfigRepository _jobConfigRepository;
-    private readonly IUnitOfWork _unitOfWork;
 
     public ScheduleJobCommandHandler(IJobRepository jobRepository,
-                                   IUnitOfWork unitOfWork,
                                    IJobConfigRepository jobConfigRepository)
     {
         _jobRepository = jobRepository;
-        _unitOfWork = unitOfWork;
         _jobConfigRepository = jobConfigRepository;
     }
 
@@ -47,9 +44,8 @@ internal class ScheduleJobCommandHandler : ICommandHandler<ScheduleJobCommand, l
                                        step.JsonParameter));
         }
 
-        _jobRepository.Add(job);
+        await _jobRepository.AddAsync(job);
 
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
         return job.Id;
     }
 }

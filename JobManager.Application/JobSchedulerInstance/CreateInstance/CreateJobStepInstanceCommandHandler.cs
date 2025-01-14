@@ -7,12 +7,11 @@ namespace JobManager.Application.JobSchedulerInstance.CreateJobInstance;
 internal class CreateJobStepInstanceCommandHandler : ICommandHandler<CreateJobStepInstanceCommand,long>
 {
     private readonly IJobInstanceRepository _jobInstanceRepository;
-    private readonly IUnitOfWork _unitofWork;
 
-    public CreateJobStepInstanceCommandHandler(IJobInstanceRepository jobInstanceRepository, IUnitOfWork unitofWork)
+    public CreateJobStepInstanceCommandHandler(IJobInstanceRepository jobInstanceRepository)
     {
         _jobInstanceRepository = jobInstanceRepository;
-        _unitofWork = unitofWork;
+    
     }
 
     async Task<Result<long>> IRequestHandler<CreateJobStepInstanceCommand, Result<long>>.Handle(CreateJobStepInstanceCommand request, CancellationToken cancellationToken)
@@ -24,8 +23,7 @@ internal class CreateJobStepInstanceCommandHandler : ICommandHandler<CreateJobSt
 
         JobStepInstance jobStepInstance = JobStepInstance.Create(jobInstance.Id, request.JobStepId, Status.NotStarted);
         jobInstance.AddJobStepInstance(jobStepInstance);
-        _jobInstanceRepository.Update(jobInstance);
-        await _unitofWork.SaveChangesAsync(cancellationToken);
+        await _jobInstanceRepository.UpdateAsync(jobInstance);
         return jobStepInstance.Id;
 
     }

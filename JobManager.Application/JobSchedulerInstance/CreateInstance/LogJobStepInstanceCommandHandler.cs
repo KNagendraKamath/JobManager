@@ -6,13 +6,11 @@ namespace JobManager.Application.JobSchedulerInstance.CreateJobInstance;
 internal class LogJobStepInstanceCommandHandler : ICommandHandler<LogJobStepInstanceCommand>
 {
     private readonly IJobStepInstanceRepository _jobStepInstanceRepository;
-    private readonly IUnitOfWork _unitofWork;
 
 
-    public LogJobStepInstanceCommandHandler(IJobStepInstanceRepository jobStepInstanceRepository, IUnitOfWork unitofWork)
+    public LogJobStepInstanceCommandHandler(IJobStepInstanceRepository jobStepInstanceRepository)
     {
         _jobStepInstanceRepository = jobStepInstanceRepository;
-        _unitofWork = unitofWork;
     }
 
 
@@ -24,9 +22,7 @@ internal class LogJobStepInstanceCommandHandler : ICommandHandler<LogJobStepInst
             throw new InvalidOperationException($"JobStepInstance with Id {request.JobStepInstanceId} not found");
 
         jobStepInstance.AddLog(request.Message);
-        _jobStepInstanceRepository.Update(jobStepInstance);
-        await _unitofWork.SaveChangesAsync(cancellationToken);
-
+        await _jobStepInstanceRepository.UpdateAsync(jobStepInstance);
         return Result.Success();
 
     }
