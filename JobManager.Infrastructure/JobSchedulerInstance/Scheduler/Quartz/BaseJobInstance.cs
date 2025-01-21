@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using Quartz;
 
-namespace JobManager.Infrastructure.JobSchedulerInstance.Scheduler.Quartz;
+namespace JobManager.Framework.Infrastructure.JobSchedulerInstance.Scheduler.Quartz;
 
 [DisallowConcurrentExecution]
 public abstract class BaseJobInstance<TParameter> : IJob

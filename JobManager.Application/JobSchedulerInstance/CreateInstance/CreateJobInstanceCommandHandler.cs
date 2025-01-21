@@ -1,17 +1,15 @@
-﻿using JobManager.Application.Abstractions.Messaging;
-using JobManager.Domain.Abstractions;
-using JobManager.Domain.JobSchedulerInstance;
+﻿using JobManager.Framework.Application.Abstractions.Messaging;
+using JobManager.Framework.Domain.Abstractions;
+using JobManager.Framework.Domain.JobSchedulerInstance;
 using MediatR;
 
-namespace JobManager.Application.JobSchedulerInstance.CreateJobInstance;
+namespace JobManager.Framework.Application.JobSchedulerInstance.CreateInstance;
 internal sealed class CreateJobInstanceCommandHandler : ICommandHandler<CreateJobInstanceCommand,long>
 {
     private readonly IJobInstanceRepository _jobInstanceRepository;
 
-    public CreateJobInstanceCommandHandler(IJobInstanceRepository jobInstanceRepository)
-    {
+    public CreateJobInstanceCommandHandler(IJobInstanceRepository jobInstanceRepository) => 
         _jobInstanceRepository = jobInstanceRepository;
-    }
 
     async Task<Result<long>> IRequestHandler<CreateJobInstanceCommand, Result<long>>.Handle(CreateJobInstanceCommand request, CancellationToken cancellationToken)
     {

@@ -1,9 +1,9 @@
 ﻿using FluentValidation;
-using JobManager.Application.Abstractions.Exceptions;
-using JobManager.Application.Abstractions.Messaging;
+using JobManager.Framework.Application.Abstractions.Exceptions;
+using JobManager.Framework.Application.Abstractions.Messaging;
 using MediatR;
 
-namespace JobManager.Application.Abstractions.Behaviors;
+namespace JobManager.Framework.Application.Abstractions.Behaviors;
 
 public class ValidationBehavior<TRequest, TResponse>
     : IPipelineBehavior<TRequest, TResponse>

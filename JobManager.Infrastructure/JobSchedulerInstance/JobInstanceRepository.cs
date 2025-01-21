@@ -1,18 +1,16 @@
 ﻿using System.Data;
 using Dapper;
-using JobManager.Application.Abstractions.Database;
-using JobManager.Domain.JobSchedulerInstance;
+using JobManager.Framework.Application.Abstractions.Database;
+using JobManager.Framework.Domain.JobSchedulerInstance;
 
-namespace JobManager.Infrastructure.JobSchedulerInstance;
+namespace JobManager.Framework.Infrastructure.JobSchedulerInstance;
 
 internal sealed class JobInstanceRepository : IJobInstanceRepository
 {
     private readonly ISqlConnectionFactory _sqlConnectionFactory;
 
-    public JobInstanceRepository(ISqlConnectionFactory sqlConnectionFactory)
-    {
+    public JobInstanceRepository(ISqlConnectionFactory sqlConnectionFactory) =>
         _sqlConnectionFactory = sqlConnectionFactory;
-    }
 
     public async Task AddAsync(JobInstance jobInstance)
     {
@@ -20,11 +18,11 @@ internal sealed class JobInstanceRepository : IJobInstanceRepository
 
         const string sql = @"
             INSERT INTO job_instance (
-                JobId, 
-                Status, 
-                CreatedTime,  
-                CreatedById, 
-                Active
+                job_id, 
+                status, 
+                created_time,  
+                created_by_id, 
+                active
             )
             VALUES (
                 @JobId, 
@@ -33,7 +31,7 @@ internal sealed class JobInstanceRepository : IJobInstanceRepository
                 @CreatedById,  
                 @Active
             )
-            RETURNING Id;";
+            RETURNING id;";
 
         jobInstance.Id = await connection.QueryFirstOrDefaultAsync<long>(sql, new
         {
@@ -51,12 +49,12 @@ internal sealed class JobInstanceRepository : IJobInstanceRepository
 
         const string sql = @"
             UPDATE job_instance
-            SET JobId = @JobId,
-                Status = @Status,
-                UpdatedTime = @UpdatedTime,
-                UpdatedById = @UpdatedById,
-                Active = @Active
-            WHERE Id = @Id;";
+            SET job_id = @JobId,
+                status = @Status,
+                updated_time = @UpdatedTime,
+                updated_by_id = @UpdatedById,
+                active = @Active
+            WHERE id = @Id;";
 
         await connection.ExecuteAsync(sql, new
         {
@@ -74,9 +72,9 @@ internal sealed class JobInstanceRepository : IJobInstanceRepository
         using IDbConnection connection = _sqlConnectionFactory.CreateConnection();
 
         const string sql = @"
-            SELECT Id, JobId, Status, CreatedTime, UpdatedTime, CreatedById, UpdatedById, Active
+            SELECT id, job_id, status, created_time, updated_time, created_by_id, updated_by_id, active
             FROM job_instance
-            WHERE Id = @Id;";
+            WHERE id = @Id;";
 
         return await connection.QuerySingleOrDefaultAsync<JobInstance>(sql, new { Id = jobInstanceId });
     }

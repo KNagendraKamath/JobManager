@@ -3,13 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.10.35122.118
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "JobManager", "JobManager", "{A8BBEF8F-2E2A-4A6B-88BB-19FB293EA134}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Framework", "Framework", "{A8BBEF8F-2E2A-4A6B-88BB-19FB293EA134}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JobManager.Domain", "JobManager.Domain\JobManager.Domain.csproj", "{BA306EDA-A057-43FB-9FB8-BD04FDF3FDC7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JobManager.Framework.Domain", "JobManager.Domain\JobManager.Framework.Domain.csproj", "{BA306EDA-A057-43FB-9FB8-BD04FDF3FDC7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JobManager.Application", "JobManager.Application\JobManager.Application.csproj", "{BF49B7B4-D586-4A81-958B-4AECC8B9ABE2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JobManager.Framework.Application", "JobManager.Application\JobManager.Framework.Application.csproj", "{BF49B7B4-D586-4A81-958B-4AECC8B9ABE2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JobManager.Infrastructure", "JobManager.Infrastructure\JobManager.Infrastructure.csproj", "{D91306F3-4E45-4845-A1BA-4980B1947808}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JobManager.Framework.Infrastructure", "JobManager.Infrastructure\JobManager.Framework.Infrastructure.csproj", "{D91306F3-4E45-4845-A1BA-4980B1947808}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JobManager.GRPC", "JobManager.GRPC\JobManager.GRPC.csproj", "{3B9BCA07-FF40-41DF-97BF-1248DC5DB168}"
 EndProject
@@ -24,6 +24,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JobRunner", "JobRunner\JobRunner.csproj", "{79F98A19-5F58-44E5-A494-D18AEEC6C53C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JobManager.Api.Test", "JobManager.Tests\JobManager.Api.Test\JobManager.Api.Test.csproj", "{83909F69-8FB6-4E64-BA9D-3BC560A1A1A1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JobManager.Framework.Presentation.Api", "JobManager.Presentation.Api\JobManager.Framework.Presentation.Api.csproj", "{4B9E2FC3-1BAB-4DB7-A400-CBEC4F07581C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -63,6 +65,10 @@ Global
 		{83909F69-8FB6-4E64-BA9D-3BC560A1A1A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{83909F69-8FB6-4E64-BA9D-3BC560A1A1A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{83909F69-8FB6-4E64-BA9D-3BC560A1A1A1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4B9E2FC3-1BAB-4DB7-A400-CBEC4F07581C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4B9E2FC3-1BAB-4DB7-A400-CBEC4F07581C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4B9E2FC3-1BAB-4DB7-A400-CBEC4F07581C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4B9E2FC3-1BAB-4DB7-A400-CBEC4F07581C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -75,6 +81,7 @@ Global
 		{742FFAF7-0A4C-4128-880B-44D840489875} = {24F938F1-43C9-4909-993F-E9C889A8E34E}
 		{2079B752-CC29-41BB-8873-F16AF44CA83F} = {C7074A49-33F8-4B23-B18F-432ECC92D6B1}
 		{79F98A19-5F58-44E5-A494-D18AEEC6C53C} = {24F938F1-43C9-4909-993F-E9C889A8E34E}
+		{4B9E2FC3-1BAB-4DB7-A400-CBEC4F07581C} = {A8BBEF8F-2E2A-4A6B-88BB-19FB293EA134}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {543AED3C-347F-4684-A91F-55BABBB28159}

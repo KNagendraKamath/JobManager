@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 
-namespace JobManager.Domain.Abstractions;
+namespace JobManager.Framework.Domain.Abstractions;
 
 public class Result
 {

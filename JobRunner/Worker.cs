@@ -1,4 +1,4 @@
-using JobManager.Domain.JobSchedulerInstance;
+using JobManager.Framework.Domain.JobSchedulerInstance;
 
 namespace JobRunner;
 

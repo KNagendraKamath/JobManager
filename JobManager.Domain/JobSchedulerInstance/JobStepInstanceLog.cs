@@ -1,7 +1,7 @@
 ﻿
-using JobManager.Domain.Abstractions;
+using JobManager.Framework.Domain.Abstractions;
 
-namespace JobManager.Domain.JobSchedulerInstance;
+namespace JobManager.Framework.Domain.JobSchedulerInstance;
 
 public class JobStepInstanceLog:Entity
 {

@@ -1,5 +1,4 @@
-﻿
-using JobManager.Application.Abstractions.Exceptions;
+﻿using JobManager.Framework.Application.Abstractions.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace JobManager.Api.Middleware;
@@ -31,7 +30,7 @@ public class ExceptionHandlingMiddleware
 
             if (exceptionDetails.Errors is not null)
                 problemDetails.Extensions["errors"] = exceptionDetails.Errors;
-            
+
 
             context.Response.StatusCode = exceptionDetails.Status;
 

@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-
-namespace JobManager.Domain.Abstractions;
+﻿namespace JobManager.Framework.Domain.Abstractions;
 
 public abstract class Entity
 {
@@ -19,8 +17,6 @@ public abstract class Entity
 
     public uint RowVersion { get; init; }
 
-    public virtual void Deactivate()
-    {
+    public virtual void Deactivate() => 
         Active = false;
-    }
 }

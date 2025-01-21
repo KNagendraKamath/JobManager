@@ -1,8 +1,7 @@
-﻿
-using JobManager.Domain.Abstractions;
-using JobManager.Domain.JobSetup;
+﻿using JobManager.Framework.Domain.Abstractions;
+using JobManager.Framework.Domain.JobSetup;
 
-namespace JobManager.Domain.JobSchedulerInstance;
+namespace JobManager.Framework.Domain.JobSchedulerInstance;
 
 public class JobStepInstance:Entity
 {
@@ -26,15 +25,10 @@ public class JobStepInstance:Entity
     public DateTimeOffset? EndTime { get; private set; }
     public List<JobStepInstanceLog> JobStepInstanceLogs { get; private set; } = new();
 
-    public static JobStepInstance Create(long jobInstanceId, long jobStepId, Status stepInstanceStatus)
-    {
-        return new JobStepInstance(jobInstanceId, jobStepId, stepInstanceStatus);
-    }
+    public static JobStepInstance Create(long jobInstanceId, long jobStepId, Status stepInstanceStatus) =>
+        new JobStepInstance(jobInstanceId, jobStepId, stepInstanceStatus);
 
-    public void UpdateStatus(Status status)
-    {
-        Status = status;
-    }
+    public void UpdateStatus(Status status) => Status = status;
 
     public void SetEndTime(DateTimeOffset endTime)
     {

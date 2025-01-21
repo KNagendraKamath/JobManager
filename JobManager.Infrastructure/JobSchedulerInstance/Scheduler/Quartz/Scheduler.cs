@@ -1,14 +1,14 @@
-﻿using JobManager.Application.JobSetup.GetJobDetail;
-using JobManager.Domain.Abstractions;
-using JobManager.Domain.JobSetup;
+﻿using JobManager.Framework.Application.JobSetup.GetJobDetail;
+using JobManager.Framework.Domain.Abstractions;
+using JobManager.Framework.Domain.JobSchedulerInstance;
+using JobManager.Framework.Domain.JobSetup;
 using MediatR;
-using Quartz.Impl.Matchers;
-using Quartz;
 using Microsoft.Extensions.Logging;
-using JobManager.Domain.JobSchedulerInstance;
+using Quartz;
+using Quartz.Impl.Matchers;
 using Quartz.Listener;
 
-namespace JobManager.Infrastructure.JobSchedulerInstance.Scheduler.Quartz;
+namespace JobManager.Framework.Infrastructure.JobSchedulerInstance.Scheduler.Quartz;
 
 internal class Scheduler : IJobScheduler
 {
@@ -85,34 +85,12 @@ internal class Scheduler : IJobScheduler
                                                    .WithIdentity($"{jobResponse.JobId}")
                                                    .StartAt(jobResponse.EffectiveDateTime);
 
-        string? cronExpression = CronExpressionGenerator(jobResponse.RecurringType,
-                                                      jobResponse.Second,
-                                                      jobResponse.Minute,
-                                                      jobResponse.Hour,
-                                                      jobResponse.Day,
-                                                      jobResponse.DayOfWeek);
-
-        if (cronExpression is not null)
-            triggerBuilder.WithCronSchedule(cronExpression);
+        if (jobResponse.CronExpression is not null)
+            triggerBuilder.WithCronSchedule(jobResponse.CronExpression);
 
         return triggerBuilder;
     }
 
-    private string CronExpressionGenerator(RecurringType? recurringType, int? second, int? minute, int? hour, int? day, DayOfWeek? dayOfWeek)
-    {
-        if (recurringType is null)
-            return null;
-
-        return recurringType switch
-        {
-            RecurringType.EveryNoSecond => $"0/{second ?? 1} * * * * ?", // Every N seconds
-            RecurringType.EveryNoMinute => $"{second ?? 0} 0/{minute ?? 1} * * * ?", // Every N minutes
-            RecurringType.Daily => $"{second ?? 0} {minute ?? 0} {hour ?? 0} * * ?", // Every day at a specific time
-            RecurringType.Weekly => $"{second ?? 0} {minute ?? 0} {hour ?? 0} ? * {dayOfWeek?.ToString().ToUpper().Substring(0, 3)}", // Every week on a specific day and time
-            RecurringType.Monthly => $"{second ?? 0} {minute ?? 0} {hour ?? 0} {day ?? 1} * ?", // Every month on a specific day and time
-            _ => throw new NotImplementedException($"Recurring type {recurringType} is not supported")
-        };
-    }
 
     public async Task UnSchedule(long GroupId, IEnumerable<long> StepId)
     {

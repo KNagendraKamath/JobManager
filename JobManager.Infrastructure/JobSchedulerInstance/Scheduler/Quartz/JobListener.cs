@@ -1,11 +1,11 @@
-﻿using JobManager.Application.JobSchedulerInstance.CreateJobInstance;
-using JobManager.Application.JobSchedulerInstance.UpdateJobInstance;
-using JobManager.Domain.Abstractions;
-using JobManager.Domain.JobSchedulerInstance;
+﻿using JobManager.Framework.Application.JobSchedulerInstance.CreateInstance;
+using JobManager.Framework.Application.JobSchedulerInstance.UpdateInstance;
+using JobManager.Framework.Domain.Abstractions;
+using JobManager.Framework.Domain.JobSchedulerInstance;
 using MediatR;
 using Quartz;
 
-namespace JobManager.Infrastructure.JobSchedulerInstance.Scheduler.Quartz;
+namespace JobManager.Framework.Infrastructure.JobSchedulerInstance.Scheduler.Quartz;
 
 internal class JobListener : IJobListener
 {

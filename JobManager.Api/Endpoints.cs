@@ -1,4 +1,4 @@
-﻿using JobManager.Api.JobSetup;
+﻿using JobManager.Framework.Infrastructure;
 
 namespace JobManager.Api;
 
@@ -6,6 +6,6 @@ public static class Endpoints
 {
     public static void MapEndpoints(IEndpointRouteBuilder app)
     {
-        JobEndPoints.MapEndpoints(app);
+        JobManagerModule.MapEndpoints(app);
     }
 }

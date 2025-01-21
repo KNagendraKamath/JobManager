@@ -1,4 +1,4 @@
-﻿namespace JobManager.Domain.Abstractions;
+﻿namespace JobManager.Framework.Domain.Abstractions;
 
 public enum ErrorType
 {

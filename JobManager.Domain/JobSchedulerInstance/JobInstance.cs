@@ -1,12 +1,10 @@
-﻿
-using JobManager.Domain.Abstractions;
-using JobManager.Domain.JobSetup;
+﻿using JobManager.Framework.Domain.Abstractions;
+using JobManager.Framework.Domain.JobSetup;
 
-namespace JobManager.Domain.JobSchedulerInstance;
+namespace JobManager.Framework.Domain.JobSchedulerInstance;
 
 public class JobInstance:Entity
 {
-
     private JobInstance() { }
 
     private JobInstance(long jobId,Status status)
@@ -21,10 +19,7 @@ public class JobInstance:Entity
     public Status Status { get; private set; }
     public List<JobStepInstance> JobStepInstances { get; private set; }
 
-    public static JobInstance Create(long jobId,Status status)
-    {
-         return new JobInstance(jobId,status);
-    }
+    public static JobInstance Create(long jobId, Status status) => new JobInstance(jobId, status);
 
     public void AddJobStepInstance(JobStepInstance jobStepInstance)
     {
@@ -35,13 +30,10 @@ public class JobInstance:Entity
 
     public void RemoveJobStepInstance(JobStepInstance jobStepInstance)
     {
-        if (jobStepInstance == null)
+        if (jobStepInstance is null)
             throw new ArgumentNullException(nameof(jobStepInstance));
         JobStepInstances.Remove(jobStepInstance);
     }
 
-    public void UpdateStatus(Status status)
-    {
-        Status = status;
-    }
+    public void UpdateStatus(Status status) => Status = status;
 }

@@ -1,5 +1,5 @@
-﻿using JobManager.Application;
-using JobManager.Infrastructure;
+﻿using JobManager.Framework.Application;
+using JobManager.Framework.Infrastructure;
 
 namespace JobRunner;
 

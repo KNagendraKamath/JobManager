@@ -1,4 +1,4 @@
-﻿namespace JobManager.Application.Abstractions.Exceptions;
+﻿namespace JobManager.Framework.Application.Abstractions.Exceptions;
 
 public sealed class ValidationException : Exception
 {

@@ -1,11 +1,11 @@
 using System.Diagnostics;
 using JobManager.Api.Test.Abstraction;
-using JobManager.Application.JobSetup.CreateJob;
-using JobManager.Domain.Abstractions;
-using JobManager.Domain.JobSetup;
+using JobManager.Framework.Application.JobSetup.ScheduleJob;
+using JobManager.Framework.Domain.Abstractions;
+using JobManager.Framework.Domain.JobSetup;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
-using RecurringDetail = JobManager.Application.JobSetup.CreateJob.RecurringDetail;
+using RecurringDetail = JobManager.Framework.Application.JobSetup.ScheduleJob.RecurringDetail;
 
 namespace JobManager.Api.Test;
 
@@ -33,7 +33,7 @@ public class JobSetupTest: BaseTest
             Result<long> result = await _sender.Send(command);
 
             Assert.True(result.IsSuccess);
-            Domain.JobSetup.Job? job = await _jobRepository.GetByIdAsync(result.Value);
+            Job? job = await _jobRepository.GetByIdAsync(result.Value);
             Assert.NotNull(job);
         }
         catch (Exception ex)
@@ -61,7 +61,7 @@ public class JobSetupTest: BaseTest
             Result<long> result = await _sender.Send(command);
 
             Assert.True(result.IsSuccess);
-            Domain.JobSetup.Job? job = await _jobRepository.GetByIdAsync(result.Value);
+            Job? job = await _jobRepository.GetByIdAsync(result.Value);
             Assert.NotNull(job);
         }
         catch (Exception ex)

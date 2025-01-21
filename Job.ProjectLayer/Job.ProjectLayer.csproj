@@ -7,8 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\JobManager.Application\JobManager.Application.csproj" />
-    <ProjectReference Include="..\JobManager.Infrastructure\JobManager.Infrastructure.csproj" />
+    <ProjectReference Include="..\JobManager.Application\JobManager.Framework.Application.csproj" />
+    <ProjectReference Include="..\JobManager.Infrastructure\JobManager.Framework.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

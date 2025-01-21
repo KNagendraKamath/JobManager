@@ -1,4 +1,5 @@
-﻿using JobManager.Infrastructure.JobSchedulerInstance.Scheduler.Quartz;
+﻿using JobManager.Framework.Infrastructure.JobSchedulerInstance.Scheduler.Quartz;
+
 namespace Job.ProjectLayer;
 
 public class Test : BaseJobInstance<TestParam>

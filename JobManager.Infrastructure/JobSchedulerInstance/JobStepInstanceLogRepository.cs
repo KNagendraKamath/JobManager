@@ -1,6 +1,6 @@
-﻿using JobManager.Domain.JobSchedulerInstance;
+﻿using JobManager.Framework.Domain.JobSchedulerInstance;
 
-namespace JobManager.Infrastructure.JobSchedulerInstance;
+namespace JobManager.Framework.Infrastructure.JobSchedulerInstance;
 
 internal sealed class JobStepInstanceLogRepository : IJobStepInstanceLogRepository
 {

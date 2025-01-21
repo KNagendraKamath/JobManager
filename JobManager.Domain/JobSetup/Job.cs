@@ -1,6 +1,6 @@
-﻿using JobManager.Domain.Abstractions;
+﻿using JobManager.Framework.Domain.Abstractions;
 
-namespace JobManager.Domain.JobSetup;
+namespace JobManager.Framework.Domain.JobSetup;
 
 public class Job : Entity
 {
@@ -21,6 +21,7 @@ public class Job : Entity
     public DateTime EffectiveDateTime { get; private set; }
     public string? Description { get; private set; }
     public JobType Type { get; private set; }
+    public string CronExpression { get; private set; }
     public RecurringDetail? RecurringDetail { get; private set; }
     public List<JobStep> JobSteps { get; private set; }
 
@@ -31,7 +32,7 @@ public class Job : Entity
         return new Job(description, effectiveDateTime, jobType);
     }
 
-    public void SetRecurringDetail(RecurringDetail recurringDetail)
+    public void SetRecurringDetail(RecurringDetail? recurringDetail)
     {
         RecurringDetail = recurringDetail;
     }
@@ -49,5 +50,10 @@ public class Job : Entity
             throw new ArgumentNullException(nameof(jobStep));
 
         JobSteps.Remove(jobStep);
+    }
+
+    public void SetCronExpression(string v)
+    {
+        throw new NotImplementedException();
     }
 }

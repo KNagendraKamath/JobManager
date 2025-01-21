@@ -1,6 +1,5 @@
 using System.Text.Json.Serialization;
 using JobManager.Api;
-using JobManager.Api.Middleware;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -9,7 +8,6 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddDependencies(builder.Configuration);
 
 builder.Services.ConfigureHttpJsonOptions(options =>
 {
@@ -18,7 +16,7 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 
 WebApplication app = builder.Build();
 
-app.UseMiddleware<ExceptionHandlingMiddleware>();
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -32,5 +30,8 @@ Endpoints.MapEndpoints(app);
 
 await app.RunAsync();
 
-public partial class Program { }
+namespace JobManager.Api
+{
+    public partial class Program { }
+}
 

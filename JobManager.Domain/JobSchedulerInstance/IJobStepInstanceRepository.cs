@@ -1,4 +1,4 @@
-﻿namespace JobManager.Domain.JobSchedulerInstance;
+﻿namespace JobManager.Framework.Domain.JobSchedulerInstance;
 
 public interface IJobStepInstanceRepository
 {

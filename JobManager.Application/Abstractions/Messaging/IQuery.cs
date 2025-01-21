@@ -1,6 +1,6 @@
-﻿using JobManager.Domain.Abstractions;
+﻿using JobManager.Framework.Domain.Abstractions;
 using MediatR;
 
-namespace JobManager.Application.Abstractions.Messaging;
+namespace JobManager.Framework.Application.Abstractions.Messaging;
 
 public interface IQuery<TResponse> : IRequest<Result<TResponse>>;

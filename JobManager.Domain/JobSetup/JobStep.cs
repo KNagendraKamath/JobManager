@@ -1,6 +1,6 @@
-﻿using JobManager.Domain.Abstractions;
+﻿using JobManager.Framework.Domain.Abstractions;
 
-namespace JobManager.Domain.JobSetup;
+namespace JobManager.Framework.Domain.JobSetup;
 
 public class JobStep:Entity
 {
