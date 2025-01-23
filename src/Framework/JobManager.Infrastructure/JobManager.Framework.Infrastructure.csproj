@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <PackageReference Include="Dapper" Version="2.1.35" />
+    <PackageReference Include="Npgsql" Version="9.0.2" />
+    <PackageReference Include="Quartz.Extensions.Hosting" Version="3.13.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\JobManager.Application\JobManager.Framework.Application.csproj" />
+  </ItemGroup>
+
+</Project>

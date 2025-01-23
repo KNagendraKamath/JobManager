@@ -5,27 +5,31 @@ VisualStudioVersion = 17.10.35122.118
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Framework", "Framework", "{A8BBEF8F-2E2A-4A6B-88BB-19FB293EA134}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JobManager.Framework.Domain", "JobManager.Domain\JobManager.Framework.Domain.csproj", "{BA306EDA-A057-43FB-9FB8-BD04FDF3FDC7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JobManager.Framework.Domain", "src\Framework\JobManager.Domain\JobManager.Framework.Domain.csproj", "{BA306EDA-A057-43FB-9FB8-BD04FDF3FDC7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JobManager.Framework.Application", "JobManager.Application\JobManager.Framework.Application.csproj", "{BF49B7B4-D586-4A81-958B-4AECC8B9ABE2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JobManager.Framework.Application", "src\Framework\JobManager.Application\JobManager.Framework.Application.csproj", "{BF49B7B4-D586-4A81-958B-4AECC8B9ABE2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JobManager.Framework.Infrastructure", "JobManager.Infrastructure\JobManager.Framework.Infrastructure.csproj", "{D91306F3-4E45-4845-A1BA-4980B1947808}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JobManager.Framework.Infrastructure", "src\Framework\JobManager.Infrastructure\JobManager.Framework.Infrastructure.csproj", "{D91306F3-4E45-4845-A1BA-4980B1947808}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JobManager.GRPC", "JobManager.GRPC\JobManager.GRPC.csproj", "{3B9BCA07-FF40-41DF-97BF-1248DC5DB168}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JobManager.Api", "src\API\JobManager.Api\JobManager.Api.csproj", "{742FFAF7-0A4C-4128-880B-44D840489875}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JobManager.Api", "JobManager.Api\JobManager.Api.csproj", "{742FFAF7-0A4C-4128-880B-44D840489875}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "API", "API", "{24F938F1-43C9-4909-993F-E9C889A8E34E}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "JobApi", "JobApi", "{24F938F1-43C9-4909-993F-E9C889A8E34E}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Modules", "Modules", "{C7074A49-33F8-4B23-B18F-432ECC92D6B1}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ProjectLayer", "ProjectLayer", "{C7074A49-33F8-4B23-B18F-432ECC92D6B1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestJob1", "src\Modules\JobRoutines\Job.ProjectLayer\TestJob1.csproj", "{2079B752-CC29-41BB-8873-F16AF44CA83F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Job.ProjectLayer", "Job.ProjectLayer\Job.ProjectLayer.csproj", "{2079B752-CC29-41BB-8873-F16AF44CA83F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JobRunner", "src\API\JobRunner\JobRunner.csproj", "{79F98A19-5F58-44E5-A494-D18AEEC6C53C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JobRunner", "JobRunner\JobRunner.csproj", "{79F98A19-5F58-44E5-A494-D18AEEC6C53C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JobManager.Api.Test", "src\Tests\JobManager.Tests\JobManager.Api.Test\JobManager.Api.Test.csproj", "{83909F69-8FB6-4E64-BA9D-3BC560A1A1A1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JobManager.Api.Test", "JobManager.Tests\JobManager.Api.Test\JobManager.Api.Test.csproj", "{83909F69-8FB6-4E64-BA9D-3BC560A1A1A1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JobManager.Framework.Presentation.Api", "src\Framework\JobManager.Presentation.Api\JobManager.Framework.Presentation.Api.csproj", "{4B9E2FC3-1BAB-4DB7-A400-CBEC4F07581C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JobManager.Framework.Presentation.Api", "JobManager.Presentation.Api\JobManager.Framework.Presentation.Api.csproj", "{4B9E2FC3-1BAB-4DB7-A400-CBEC4F07581C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Job.Modules.Common", "src\Modules\Job.Modules.Common\Job.Modules.Common.csproj", "{409282B8-6A98-46AA-8629-7D9B512F6406}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "JobRoutines", "JobRoutines", "{8F506CAE-6990-492E-BC78-4A8CFA0593FE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DDV.Jobs", "src\Modules\JobRoutines\DDV.Jobs\DDV.Jobs.csproj", "{981290DC-4D7D-4FA9-92FA-0AB2C44CFF5A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,10 +49,6 @@ Global
 		{D91306F3-4E45-4845-A1BA-4980B1947808}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D91306F3-4E45-4845-A1BA-4980B1947808}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D91306F3-4E45-4845-A1BA-4980B1947808}.Release|Any CPU.Build.0 = Release|Any CPU
-		{3B9BCA07-FF40-41DF-97BF-1248DC5DB168}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3B9BCA07-FF40-41DF-97BF-1248DC5DB168}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3B9BCA07-FF40-41DF-97BF-1248DC5DB168}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3B9BCA07-FF40-41DF-97BF-1248DC5DB168}.Release|Any CPU.Build.0 = Release|Any CPU
 		{742FFAF7-0A4C-4128-880B-44D840489875}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{742FFAF7-0A4C-4128-880B-44D840489875}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{742FFAF7-0A4C-4128-880B-44D840489875}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -69,6 +69,14 @@ Global
 		{4B9E2FC3-1BAB-4DB7-A400-CBEC4F07581C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4B9E2FC3-1BAB-4DB7-A400-CBEC4F07581C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4B9E2FC3-1BAB-4DB7-A400-CBEC4F07581C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{409282B8-6A98-46AA-8629-7D9B512F6406}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{409282B8-6A98-46AA-8629-7D9B512F6406}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{409282B8-6A98-46AA-8629-7D9B512F6406}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{409282B8-6A98-46AA-8629-7D9B512F6406}.Release|Any CPU.Build.0 = Release|Any CPU
+		{981290DC-4D7D-4FA9-92FA-0AB2C44CFF5A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{981290DC-4D7D-4FA9-92FA-0AB2C44CFF5A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{981290DC-4D7D-4FA9-92FA-0AB2C44CFF5A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{981290DC-4D7D-4FA9-92FA-0AB2C44CFF5A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -77,11 +85,13 @@ Global
 		{BA306EDA-A057-43FB-9FB8-BD04FDF3FDC7} = {A8BBEF8F-2E2A-4A6B-88BB-19FB293EA134}
 		{BF49B7B4-D586-4A81-958B-4AECC8B9ABE2} = {A8BBEF8F-2E2A-4A6B-88BB-19FB293EA134}
 		{D91306F3-4E45-4845-A1BA-4980B1947808} = {A8BBEF8F-2E2A-4A6B-88BB-19FB293EA134}
-		{3B9BCA07-FF40-41DF-97BF-1248DC5DB168} = {24F938F1-43C9-4909-993F-E9C889A8E34E}
 		{742FFAF7-0A4C-4128-880B-44D840489875} = {24F938F1-43C9-4909-993F-E9C889A8E34E}
-		{2079B752-CC29-41BB-8873-F16AF44CA83F} = {C7074A49-33F8-4B23-B18F-432ECC92D6B1}
+		{2079B752-CC29-41BB-8873-F16AF44CA83F} = {8F506CAE-6990-492E-BC78-4A8CFA0593FE}
 		{79F98A19-5F58-44E5-A494-D18AEEC6C53C} = {24F938F1-43C9-4909-993F-E9C889A8E34E}
 		{4B9E2FC3-1BAB-4DB7-A400-CBEC4F07581C} = {A8BBEF8F-2E2A-4A6B-88BB-19FB293EA134}
+		{409282B8-6A98-46AA-8629-7D9B512F6406} = {C7074A49-33F8-4B23-B18F-432ECC92D6B1}
+		{8F506CAE-6990-492E-BC78-4A8CFA0593FE} = {C7074A49-33F8-4B23-B18F-432ECC92D6B1}
+		{981290DC-4D7D-4FA9-92FA-0AB2C44CFF5A} = {8F506CAE-6990-492E-BC78-4A8CFA0593FE}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {543AED3C-347F-4684-A91F-55BABBB28159}
