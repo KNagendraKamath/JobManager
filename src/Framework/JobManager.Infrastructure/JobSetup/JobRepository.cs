@@ -17,21 +17,21 @@ internal sealed class JobRepository : IJobRepository
         using IDbConnection connection = _sqlConnectionFactory.CreateConnection();
 
         const string sql = @"
-            INSERT INTO job(
+            INSERT INTO JOB.job(
                 description, 
                 effective_date_time, 
                 type, 
                 created_time,  
-                created_by_id, 
-                active
+                active,
+                cron_expression
             )
             VALUES (
                 @Description, 
                 @EffectiveDateTime, 
                 @Type, 
                 @CreatedTime, 
-                @CreatedById,  
-                @Active
+                @Active,
+                @CronExpression
             )
             RETURNING id;";
 
@@ -41,14 +41,14 @@ internal sealed class JobRepository : IJobRepository
             job.EffectiveDateTime,
             job.Type,
             job.CreatedTime,
-            job.CreatedById,
-            job.Active
+            job.Active,
+            job.CronExpression
         });
 
         if (job.RecurringDetail != null)
         {
             const string recurringSql = @"
-                INSERT INTO recurring_detail(
+                INSERT INTO JOB.recurring_detail(
                     job_id,
                     recurring_type,
                     second,
@@ -57,7 +57,6 @@ internal sealed class JobRepository : IJobRepository
                     day_of_week,
                     day,
                     created_time,
-                    created_by_id,
                     active
                 )
                 VALUES (
@@ -69,7 +68,6 @@ internal sealed class JobRepository : IJobRepository
                     @DayOfWeek,
                     @Day,
                     @CreatedTime,
-                    @CreatedById,
                     @Active
                 );";
 
@@ -83,7 +81,6 @@ internal sealed class JobRepository : IJobRepository
                 job.RecurringDetail.DayOfWeek,
                 job.RecurringDetail.Day,
                 job.CreatedTime,
-                job.CreatedById,
                 job.Active
             });
         }
@@ -96,18 +93,16 @@ internal sealed class JobRepository : IJobRepository
         using IDbConnection connection = _sqlConnectionFactory.CreateConnection();
 
         const string sql = @"
-            UPDATE job
+            UPDATE JOB.job
             SET 
                 active = 0,
-                updated_time = @UpdatedTime,
-                updated_by_id = @UpdatedById
+                updated_time = @UpdatedTime
             WHERE id = @Id;";
 
         await connection.ExecuteAsync(sql, new
         {
             Id = jobId,
-            UpdatedTime = DateTimeOffset.UtcNow,
-            UpdatedById = 1 // Assuming a default user ID for the update
+            UpdatedTime = DateTime.UtcNow
         });
     }
 
@@ -128,8 +123,8 @@ internal sealed class JobRepository : IJobRepository
                    hours, 
                    day_of_week, 
                    day
-            FROM job
-            LEFT JOIN recurring_detail
+            FROM JOB.job job
+            LEFT JOIN JOB.recurring_detail recurring_detail
                 ON job.id = recurring_detail.job_id
             WHERE job.id = @Id;";
 
@@ -137,7 +132,7 @@ internal sealed class JobRepository : IJobRepository
                                                     sql,
                                                     (job, recurringDetail) =>
                                                     {
-                                                        if (recurringDetail != null)
+                                                        if (recurringDetail is not null)
                                                             job.SetRecurringDetail(recurringDetail);
 
                                                         return job;
@@ -157,50 +152,43 @@ internal sealed class JobRepository : IJobRepository
 
         const string sql = @"
 
-            CREATE TEMP TABLE temp_job ON COMMIT DROP AS
             SELECT job.id, 
-                   description, 
-                   effective_date_time, 
-                   type, 
-                   active
-            FROM job
+                   job.description, 
+                   job.effective_date_time, 
+                   job.type, 
+                   job.cron_expression,
+                   job.active,
+                   recurring_detail.id As RecurringDetailId,
+                   recurring_detail.recurring_type, 
+                   recurring_detail.second, 
+                   recurring_detail.minute, 
+                   recurring_detail.hours, 
+                   recurring_detail.day_of_week, 
+                   recurring_detail.day
+            FROM JOB.job job
+                LEFT JOIN JOB.recurring_detail recurring_detail
+                    ON job.id = JOB.recurring_detail.job_id
             ORDER BY job.id
             OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY;
-
-            SELECT recurring_detail.id,
-                   recurring_type, 
-                   second, 
-                   minute, 
-                   hours, 
-                   day_of_week, 
-                   day,
-                   recurring_detail.active,
-                   job.Id
-            FROM recurring_detail
-                JOIN temp_job 
-                    on recurring_detail.job_id = temp_job.id;
             ";
 
-        using SqlMapper.GridReader JobDetailQuery =await connection.QueryMultipleAsync(
-                                                    sql,
-                                                    param:
-                                                    new
-                                                    {
-                                                        Offset = (page - 1) * pageSize,
-                                                        PageSize = pageSize
-                                                    });
+        return await connection.QueryAsync<Job,RecurringDetail,Job>(
+                                                 sql,
+                                                  (job, recurringDetail) =>
+                                                  {
+                                                      if (recurringDetail != null) job.SetRecurringDetail(recurringDetail);
 
-        IEnumerable<Job> jobs = await JobDetailQuery.ReadAsync<Job>();
-        IEnumerable<RecurringDetail> recurringDetails = await JobDetailQuery.ReadAsync<RecurringDetail>();
+                                                      return job;
+                                                  },
+                                                 new
+                                                 {
+                                                     Offset = (page - 1) * pageSize,
+                                                     PageSize = pageSize
+                                                 },
+                                                 splitOn: "RecurringDetailId"     
+                                                );
 
-        return jobs.Join(recurringDetails,
-                        job => job.Id,
-                        recurringDetail => recurringDetail.JobId,
-                        (job, recurringDetail) =>
-                        {
-                            job.SetRecurringDetail(recurringDetail);
-                            return job;
-                        });
+
     }
 
     public async Task RemoveJobStep(long jobStepId, CancellationToken cancellationToken = default)
@@ -208,18 +196,18 @@ internal sealed class JobRepository : IJobRepository
         using IDbConnection connection = _sqlConnectionFactory.CreateConnection();
 
         const string sql = @"
-            UPDATE job_step
+            UPDATE JOB.job_step
             SET 
                 active = 0,
-                updated_time = @UpdatedTime,
-                updated_by_id = @UpdatedById
+                updated_time = @UpdatedTime
             WHERE id = @Id;";
 
         await connection.ExecuteAsync(sql, new
         {
             Id = jobStepId,
-            UpdatedTime = DateTimeOffset.UtcNow,
-            UpdatedById = 1 // Assuming a default user ID for the update
+            UpdatedTime = DateTime.UtcNow
         });
     }
+
+  
 }

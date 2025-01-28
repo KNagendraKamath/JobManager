@@ -4,15 +4,13 @@ public abstract class Entity
 {
     protected Entity()
     {
-        CreatedTime = DateTimeOffset.UtcNow;
+        CreatedTime = DateTime.UtcNow;
         Active = true;
     }
 
     public long Id { get; set; } 
     public DateTimeOffset CreatedTime { get; init; }
     public DateTimeOffset? UpdatedTime { get; set; }
-    public long CreatedById { get; set; }
-    public long? UpdatedById { get; set; }
     public bool Active { get; set; }
 
     public uint RowVersion { get; init; }

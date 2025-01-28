@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using JobManager.Api;
+using JobManager.Api.Middleware;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -26,6 +27,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 Endpoints.MapEndpoints(app);
 

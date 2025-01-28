@@ -20,11 +20,7 @@ internal static class ScheduleJob
                                                                          request.JobSteps,
                                                                          request.RecurringDetail));
 
-            if (result!.IsFailure)
-                return ApiStatus.Failure(result);
-
-            return Results.Ok(result.Value);
-
+            return result!.IsFailure ? ApiStatus.Failure(result) : Results.Ok(result);
         });
     }
 

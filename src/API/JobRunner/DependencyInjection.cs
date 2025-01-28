@@ -10,9 +10,10 @@ internal static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        services.AddApplication();
         services.AddInfrastructure(configuration);
+        services.AddApplication();
         services.AddJobRoutines(configuration);
+
         return services;
     }
 }

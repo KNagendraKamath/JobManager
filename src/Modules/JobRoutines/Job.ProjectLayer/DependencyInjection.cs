@@ -3,7 +3,7 @@
 namespace Job.ProjectLayer;
 public static class DependencyInjection
 {
-    public static IServiceCollection AddProjectJob(this IServiceCollection services)
+    public static IServiceCollection AddTestJob(this IServiceCollection services)
     {
         services.AddTransient<Test>();
         return services;

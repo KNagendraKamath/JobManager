@@ -11,7 +11,7 @@ public record ScheduleJobCommand(
     List<Step> JobSteps,
     RecurringDetail? RecurringDetail = default) : ICommand<long>;
 
-public record Step(string JobName, string JsonParameter);
+public record Step(string JobName, string JsonParameter = "{}"); 
 
 public record RecurringDetail
 {

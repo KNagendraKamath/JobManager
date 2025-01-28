@@ -1,22 +1,29 @@
 using JobManager.Framework.Domain.JobSchedulerInstance;
+using JobManager.Framework.Domain.JobSetup;
+
 
 namespace JobRunner;
 
 internal sealed class Worker : BackgroundService
 {
     private readonly IJobScheduler _scheduler;
+    private readonly IJobAssemblyProvider _assemblyProvider;
 
-    public Worker(IJobScheduler scheduler) => 
-        _scheduler = scheduler;
+    public Worker(IJobScheduler jobScheduler,
+                  IJobAssemblyProvider jobAssemblyProvider)
+    {
+        _scheduler = jobScheduler;
+        _assemblyProvider = jobAssemblyProvider;
+    }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        await _assemblyProvider.LoadJobsFromAssemblyAsync(stoppingToken);
         StartPollingDatabase(stoppingToken);
 
         while (!stoppingToken.IsCancellationRequested)
             await Task.Delay(1000, stoppingToken);
     }
-
 
     private void StartPollingDatabase(CancellationToken cancellationToken)
     {

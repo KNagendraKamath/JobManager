@@ -18,9 +18,9 @@ internal sealed class JobStepInstanceRepository : IJobStepInstanceRepository
 
         const string query = @"
             SELECT 
-                id, job_instance_id, job_step_id, status, start_time, end_time, created_time, updated_time, created_by_id, updated_by_id, active
+                id, job_instance_id, job_step_id, status, start_time, end_time, created_time, updated_time, active
             FROM 
-                job_step_instance
+                JOB.job_step_instance
             WHERE 
                 id = @Id";
 
@@ -33,7 +33,7 @@ internal sealed class JobStepInstanceRepository : IJobStepInstanceRepository
         using IDbConnection connection = _sqlConnectionFactory.CreateConnection();
 
         const string query = @"
-            UPDATE job_step_instance
+            UPDATE JOB.job_step_instance
             SET 
                 job_instance_id = @JobInstanceId,
                 job_step_id = @JobStepId,
@@ -41,7 +41,6 @@ internal sealed class JobStepInstanceRepository : IJobStepInstanceRepository
                 start_time = @StartTime,
                 end_time = @EndTime,
                 updated_time = @UpdatedTime,
-                updated_by_id = @UpdatedById,
                 active = @Active
             WHERE 
                 id = @Id";
@@ -53,8 +52,7 @@ internal sealed class JobStepInstanceRepository : IJobStepInstanceRepository
             jobStepInstance.Status,
             jobStepInstance.StartTime,
             jobStepInstance.EndTime,
-            UpdatedTime = DateTimeOffset.UtcNow,
-            jobStepInstance.UpdatedById,
+            UpdatedTime = DateTime.UtcNow,
             jobStepInstance.Active,
             jobStepInstance.Id
         });

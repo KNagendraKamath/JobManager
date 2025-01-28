@@ -22,15 +22,18 @@ public class JobSetupTest : BaseTest
         _jobRepository = scope.ServiceProvider.GetService<IJobRepository>()!;
     }
 
+
+
+
     [Fact]
     public async Task Create_OneTimeJob_And_PersistAsync()
     {
         try
         {
             ScheduleJobCommand command = new ScheduleJobCommand("Test",
-                                                            DateTime.UtcNow,
+                                                            DateTime.Now,
                                                             JobType.Onetime,
-                                                            [new Step("Test", "{}")]);
+                                                            [new Step("Test")]);
 
             Result<long> result = await _sender.Send(command);
 
@@ -50,7 +53,7 @@ public class JobSetupTest : BaseTest
         try
         {
             ScheduleJobCommand command = new ScheduleJobCommand("Job2",
-                                                            DateTime.UtcNow,
+                                                            DateTime.Now,
                                                             JobType.Recurring,
                                                             [new Step("Job2", """{"Name": "NagendraK"}""")],
                                                             new RecurringDetail(RecurringType.EveryNoSecond,

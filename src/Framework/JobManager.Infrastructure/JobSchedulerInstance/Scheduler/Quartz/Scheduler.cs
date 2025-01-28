@@ -1,7 +1,11 @@
-﻿using JobManager.Framework.Application.JobSetup.GetJobDetail;
+﻿using System.Threading;
+using JobManager.Framework.Application.JobSetup.GetJobDetail;
 using JobManager.Framework.Domain.Abstractions;
 using JobManager.Framework.Domain.JobSchedulerInstance;
+using JobManager.Framework.Domain.JobSetup;
 using MediatR;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Quartz;
 using Quartz.Impl.Matchers;
 using Quartz.Listener;
@@ -10,34 +14,50 @@ namespace JobManager.Framework.Infrastructure.JobSchedulerInstance.Scheduler.Qua
 
 internal sealed class Scheduler : IJobScheduler
 {
-    private readonly ISchedulerFactory _schedulerFactory;
-    private IScheduler _scheduler;
-    private readonly ISender _sender;
+    private readonly IScheduler _scheduler;
+    private readonly IServiceProvider _serviceProvider;
+    private readonly IJobAssemblyProvider _jobAssemblyProvider;
+    private readonly ILogger<Scheduler> _logger;
 
     public Scheduler(ISchedulerFactory schedulerFactory,
-                           ISender sender
-                           )
+                     IJobAssemblyProvider jobAssemblyProvider,
+                     ILogger<Scheduler> logger,
+                     IServiceProvider serviceProvider
+                    )
     {
-        _schedulerFactory = schedulerFactory;
-        _sender = sender;
+        _jobAssemblyProvider = jobAssemblyProvider;
+        _serviceProvider = serviceProvider;
+        _logger = logger;
+        _scheduler = schedulerFactory.GetScheduler().Result;
     }
 
     public async Task ExecuteAsync(CancellationToken cancellationToken=default)
     {
-        _scheduler = await _schedulerFactory.GetScheduler(cancellationToken);
-      
+        _logger.LogInformation("Fetching any new jobs to be scheduled");
+
         IReadOnlyCollection<JobKey> jobKeys = await _scheduler.GetJobKeys(GroupMatcher<JobKey>.AnyGroup(), cancellationToken);
         string alreadyScheduledJobIds = string.Join(",", jobKeys.Select(j => j.Group));
 
-        Result<List<JobResponse>> jobsToBeScheduled = await _sender.Send(new GetPendingOneTimeAndRecurringJobQuery(alreadyScheduledJobIds), cancellationToken);
+        using IServiceScope scope = _serviceProvider.CreateScope();
+        Result<IReadOnlyList<JobResponse>> jobsToBeScheduled = await scope.ServiceProvider
+                                                                 .GetRequiredService<ISender>()
+                                                                 .Send(new GetPendingOneTimeAndRecurringJobQuery(alreadyScheduledJobIds),
+                                                                       cancellationToken);
 
-        foreach (JobResponse jobResponse in jobsToBeScheduled.Value ?? new())
+        if (jobsToBeScheduled.IsFailure)
+        {
+            _logger.LogError("Failed to retrieve jobs to be scheduled: {ErrorDescription}", jobsToBeScheduled.Error.Description);
+            return;
+        }
+
+        foreach (JobResponse jobResponse in jobsToBeScheduled.Value)
         {
             List<IJobDetail> jobDetails = CreateJobDetails(jobResponse);
             ConfigureJobChainListener(jobResponse.JobId, jobDetails);
             TriggerBuilder triggerBuilder = GenerateTrigger(jobResponse);
             await _scheduler.ScheduleJob(jobDetails[0], triggerBuilder.Build(), cancellationToken);
         }
+        _logger.LogInformation("New jobs scheduled");
     }
 
     private void ConfigureJobChainListener(long JobId, List<IJobDetail> jobDetails)
@@ -61,10 +81,11 @@ internal sealed class Scheduler : IJobScheduler
 
         jobResponse.Steps.ForEach(step =>
         {
-            Type jobAssembly = Type.GetType(step.Assembly);
+            string jobAssemblyName = _jobAssemblyProvider.GetAssemblyName(step.JobConfigName);
+            Type jobAssembly = Type.GetType(jobAssemblyName);
 
             if (jobAssembly is null)
-                throw new InvalidProgramException($"Job assembly {step.Assembly} not found");
+                throw new InvalidProgramException($"Job assembly {jobAssemblyName} not found");
 
             jobDetails.Add(JobBuilder.Create(jobAssembly)
                                        .WithIdentity($"{step.JobStepId}", $"{jobResponse.JobId}")

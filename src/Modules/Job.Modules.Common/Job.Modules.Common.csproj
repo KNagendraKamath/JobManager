@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\JobRoutines\DDV.Jobs\DDV.Jobs.csproj" />
+    <ProjectReference Include="..\JobRoutines\Job.ProjectLayer\TestJob1.csproj" />
   </ItemGroup>
 
 </Project>

@@ -17,18 +17,16 @@ internal sealed class JobInstanceRepository : IJobInstanceRepository
         using IDbConnection connection = _sqlConnectionFactory.CreateConnection();
 
         const string sql = @"
-            INSERT INTO job_instance (
+            INSERT INTO JOB.job_instance (
                 job_id, 
                 status, 
                 created_time,  
-                created_by_id, 
                 active
             )
             VALUES (
                 @JobId, 
                 @Status, 
                 @CreatedTime, 
-                @CreatedById,  
                 @Active
             )
             RETURNING id;";
@@ -38,7 +36,6 @@ internal sealed class JobInstanceRepository : IJobInstanceRepository
             jobInstance.JobId,
             jobInstance.Status,
             jobInstance.CreatedTime,
-            jobInstance.CreatedById,
             jobInstance.Active
         });
     }
@@ -48,11 +45,10 @@ internal sealed class JobInstanceRepository : IJobInstanceRepository
         using IDbConnection connection = _sqlConnectionFactory.CreateConnection();
 
         const string sql = @"
-            UPDATE job_instance
+            UPDATE JOB.job_instance
             SET job_id = @JobId,
                 status = @Status,
                 updated_time = @UpdatedTime,
-                updated_by_id = @UpdatedById,
                 active = @Active
             WHERE id = @Id;";
 
@@ -61,7 +57,6 @@ internal sealed class JobInstanceRepository : IJobInstanceRepository
             jobInstance.JobId,
             jobInstance.Status,
             jobInstance.UpdatedTime,
-            jobInstance.UpdatedById,
             jobInstance.Active,
             jobInstance.Id
         });
@@ -72,8 +67,8 @@ internal sealed class JobInstanceRepository : IJobInstanceRepository
         using IDbConnection connection = _sqlConnectionFactory.CreateConnection();
 
         const string sql = @"
-            SELECT id, job_id, status, created_time, updated_time, created_by_id, updated_by_id, active
-            FROM job_instance
+            SELECT id, job_id, status, created_time, updated_time, active
+            FROM JOB.job_instance
             WHERE id = @Id;";
 
         return await connection.QuerySingleOrDefaultAsync<JobInstance>(sql, new { Id = jobInstanceId });

@@ -1,4 +1,6 @@
-﻿using JobManager.Framework.Application.Abstractions.Database;
+﻿using Dapper;
+using JobManager.Framework.Application.Abstractions.Database;
+using JobManager.Framework.Application.JobSetup;
 using JobManager.Framework.Domain.JobSchedulerInstance;
 using JobManager.Framework.Domain.JobSetup;
 using JobManager.Framework.Infrastructure.Abstractions;
@@ -40,6 +42,15 @@ public static class JobManagerModule
         string connectionString = configuration.GetConnectionString("Database") ??
                                        throw new ArgumentNullException(nameof(configuration));
 
+        services.AddScoped<ISqlConnectionFactory>(_ =>
+    new SqlConnectionFactory(connectionString));
+
+        //Enum type handlers for Dapper SQL
+        SqlMapper.AddTypeHandler(new EnumTypeHandler<Status>());
+        SqlMapper.AddTypeHandler(new EnumTypeHandler<JobType>());
+        SqlMapper.AddTypeHandler(new EnumTypeHandler<RecurringType>());
+
+        // Add Repositories
         services.AddScoped<IJobConfigRepository, JobConfigRepository>();
         services.AddScoped<IJobRepository, JobRepository>();
         services.AddScoped<IJobStepRepository, JobStepRepository>();
@@ -47,7 +58,10 @@ public static class JobManagerModule
         services.AddScoped<IJobStepInstanceRepository, JobStepInstanceRepository>();
         services.AddScoped<IJobStepInstanceLogRepository, JobStepInstanceLogRepository>();
 
-        services.AddSingleton<ISqlConnectionFactory>(_ =>
-            new SqlConnectionFactory(connectionString));
+        //Add Query
+        services.AddScoped<IJobQuery, JobQuery>();
+
+
+
     }
 }

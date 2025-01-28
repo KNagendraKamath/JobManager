@@ -20,10 +20,10 @@ internal sealed class JobStepRepository : IJobStepRepository
 
         const string sql = @"
             SELECT job_step.*
-            FROM job_step
-                join job_config 
+            FROM JOB.job_step job_step
+                join JOB.job_config job_config
                     on job_step.job_config_id = job_config.id
-            WHERE job_Id = @jobId and job_config.name = @jobName";
+            WHERE job_step.job_Id = @jobId and job_config.name = @jobName";
 
         return await connection.QuerySingleOrDefaultAsync<JobStep>(sql,
                                                                    new { jobId = jobId, jobName = jobName });

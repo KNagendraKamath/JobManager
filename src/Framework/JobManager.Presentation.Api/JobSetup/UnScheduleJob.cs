@@ -12,11 +12,7 @@ internal static class UnScheduleJob
         app.MapPost("UnScheduleJob", async (UnScheduleJobRequest request, ISender sender) =>
         {
             Result result = await sender.Send(new UnscheduleJobCommand(request.JobId, request.JobName));
-
-            if (result!.IsFailure)
-                return ApiStatus.Failure(result);
-
-            return Results.Ok(result);
+            return result!.IsFailure ? ApiStatus.Failure(result) : Results.Ok(result);
         });
     }
 }

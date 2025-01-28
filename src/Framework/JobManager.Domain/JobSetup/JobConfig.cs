@@ -5,6 +5,16 @@ namespace JobManager.Framework.Domain.JobSetup;
 public class JobConfig:Entity
 {
     public JobConfig() { }
-    public string Name { get; init; }
-    public string Assembly { get; init; }
+
+    private JobConfig(string name)
+    {
+        Name = name;
+        Active = true;
+        CreatedTime = DateTime.UtcNow;
+    }
+
+    public string Name { get; private set; }
+
+    public static JobConfig Create(string name) => new(name);
+    
 }

@@ -12,11 +12,7 @@ internal static class GetAllJob
         app.MapPost("GetAllJob", async (int Page,int PageSize, ISender sender) =>
         {
             Result result = await sender.Send(new GetAllJobQuery(Page, PageSize));
-
-            if (result!.IsFailure)
-                return ApiStatus.Failure(result);
-
-            return Results.Ok(result);
+            return result!.IsFailure? ApiStatus.Failure(result): Results.Ok(result);
         });
-    }
+    } 
 }
