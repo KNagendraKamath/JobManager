@@ -1,13 +1,12 @@
-﻿using Dapper;
-using JobManager.Framework.Application.Abstractions.Database;
+﻿using JobManager.Framework.Application.Abstractions.Database;
 using JobManager.Framework.Application.JobSetup;
 using JobManager.Framework.Domain.JobSchedulerInstance;
 using JobManager.Framework.Domain.JobSetup;
 using JobManager.Framework.Infrastructure.Abstractions;
 using JobManager.Framework.Infrastructure.JobSchedulerInstance;
-using JobManager.Framework.Infrastructure.JobSchedulerInstance.Scheduler;
-using JobManager.Framework.Infrastructure.JobSchedulerInstance.Scheduler.Quartz;
 using JobManager.Framework.Infrastructure.JobSetup;
+using JobManager.Framework.Infrastructure.Scheduler;
+using JobManager.Framework.Infrastructure.Scheduler.Quartz;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Quartz;
@@ -30,9 +29,10 @@ public static class JobManagerModule
 
     private static void AddScheduler(IServiceCollection services)
     {
+        services.AddScoped<IJobAssemblyProvider, JobAssemblyProvider>();
         services.AddQuartz(q=> q.AddJobListener<JobListener>(GroupMatcher<JobKey>.AnyGroup()));
         services.AddQuartzHostedService(options => options.WaitForJobsToComplete = true); 
-        services.AddScoped<IJobScheduler,Scheduler>();
+        services.AddScoped<IJobScheduler, QuartzJobScheduler>();
     }
 
     private static void AddRepository(IServiceCollection services, IConfiguration configuration)
@@ -42,11 +42,6 @@ public static class JobManagerModule
 
         services.AddScoped<ISqlConnectionFactory>(_ =>
     new SqlConnectionFactory(connectionString));
-
-        //Enum type handlers for Dapper SQL
-        SqlMapper.AddTypeHandler(new EnumTypeHandler<Status>());
-        SqlMapper.AddTypeHandler(new EnumTypeHandler<JobType>());
-        SqlMapper.AddTypeHandler(new EnumTypeHandler<RecurringType>());
 
         // Add Repositories
         services.AddScoped<IJobConfigRepository, JobConfigRepository>();

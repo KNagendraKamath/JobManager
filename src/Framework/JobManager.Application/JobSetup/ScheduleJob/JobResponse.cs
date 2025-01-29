@@ -1,6 +1,4 @@
-﻿using JobManager.Framework.Domain.JobSetup;
-
-namespace JobManager.Framework.Application.JobSetup.ScheduleJob;
+﻿namespace JobManager.Framework.Application.JobSetup.ScheduleJob;
 public sealed class JobResponse
 {
     public long JobId { get; init; }
@@ -22,6 +20,5 @@ public sealed class JobStepResponse
 {
     public long JobStepId { get; init; }
     public string JobConfigName { get; init; }
-    public string Assembly { get; init; }
     public string JsonParameter { get; init; }
 }

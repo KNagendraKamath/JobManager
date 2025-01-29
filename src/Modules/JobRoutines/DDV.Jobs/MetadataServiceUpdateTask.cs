@@ -1,4 +1,4 @@
-﻿using JobManager.Framework.Infrastructure.JobSchedulerInstance.Scheduler.Quartz;
+﻿using JobManager.Framework.Infrastructure.Scheduler.Quartz;
 
 namespace DDV.Jobs;
 

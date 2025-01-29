@@ -2,26 +2,31 @@ using System.Collections.Frozen;
 using JobManager.Framework.Application.JobSetup.ConfigureJob;
 using JobManager.Framework.Domain.Abstractions;
 using JobManager.Framework.Domain.JobSetup;
-using JobManager.Framework.Infrastructure.JobSchedulerInstance.Scheduler.Quartz;
+using JobManager.Framework.Infrastructure.Scheduler.Quartz;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Job.Modules.Common;
+namespace JobManager.Framework.Infrastructure.Abstractions;
 
-internal sealed class JobAssemblyProvider :IJobAssemblyProvider
+internal sealed class JobAssemblyProvider : IJobAssemblyProvider
 {
     private static FrozenDictionary<string, string> JobNameAssemblyDictionary { get; set; }
     private readonly IServiceProvider _serviceProvider;
 
-    public JobAssemblyProvider(IServiceProvider serviceProvider) => _serviceProvider = serviceProvider;
+    public JobAssemblyProvider(IServiceProvider serviceProvider)
+    {
+        _serviceProvider = serviceProvider;
+        _ = LoadJobsFromAssemblyAsync();
+    }
 
     public async Task LoadJobsFromAssemblyAsync(CancellationToken cancellationToken = default)
     {
-        if(JobNameAssemblyDictionary is not null && JobNameAssemblyDictionary.Any())  return;
+        if (JobNameAssemblyDictionary is not null && JobNameAssemblyDictionary.Any())
+            return;
 
-        using IServiceScope scope = _serviceProvider.CreateScope();   
+        using IServiceScope scope = _serviceProvider.CreateScope();
         ISender _sender = scope.ServiceProvider.GetRequiredService<ISender>();
-      
+
         try
         {
             Type BaseType = typeof(BaseJobInstance<>);
@@ -40,7 +45,7 @@ internal sealed class JobAssemblyProvider :IJobAssemblyProvider
             if (repeatedTypeNames.Any())
                 throw new InvalidOperationException($"The following job name(s) are repeated: {string.Join(", ", repeatedTypeNames)}");
 
-            JobNameAssemblyDictionary = Types.ToFrozenDictionary(type => type.Name, type => type.AssemblyQualifiedName??string.Empty);
+            JobNameAssemblyDictionary = Types.ToFrozenDictionary(type => type.Name, type => type.AssemblyQualifiedName ?? string.Empty);
             await SyncJobConfigToDatabase(_sender, JobNameAssemblyDictionary.Select(x => x.Key));
         }
         catch (Exception ex)

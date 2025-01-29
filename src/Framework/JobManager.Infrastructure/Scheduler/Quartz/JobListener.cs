@@ -1,30 +1,35 @@
 ﻿using System.Globalization;
+using JobManager.Framework.Application.JobSchedulerInstance;
 using JobManager.Framework.Application.JobSchedulerInstance.CreateInstance;
 using JobManager.Framework.Application.JobSchedulerInstance.LogInstance;
 using JobManager.Framework.Application.JobSchedulerInstance.UpdateInstance;
 using JobManager.Framework.Domain.Abstractions;
-using JobManager.Framework.Domain.JobSchedulerInstance;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Quartz;
+using Quartz.Logging;
 using Exceptions = JobManager.Framework.Application.Abstractions.Exceptions;
 
-namespace JobManager.Framework.Infrastructure.JobSchedulerInstance.Scheduler.Quartz;
+namespace JobManager.Framework.Infrastructure.Scheduler.Quartz;
 
 internal sealed class JobListener : IJobListener
 {
     private readonly IServiceProvider _serviceProvider;
-    private ISender _sender;
     private long JobId { get; set; }
     private long JobStepId { get; set; }
     private long JobInstanceId { get; set; }
     private long JobStepInstanceId { get; set; }
 
-    public JobListener(IServiceProvider serviceProvider) => _serviceProvider = serviceProvider;
+    public JobListener(IServiceProvider serviceProvider)
+    {
+        _serviceProvider = serviceProvider;
+    }
 
     public string Name => "JobListener";
 
-    readonly Func<ISender, long, long, Status,string, Task> updateStatus = static async (_sender, instanceId, stepInstanceId,status, logMessage) =>
+    readonly Func<ISender, long, long, Status, string, Task> updateStatus = 
+        static async (_sender, instanceId, stepInstanceId, status, logMessage) =>
     {
         try
         {
@@ -46,15 +51,19 @@ internal sealed class JobListener : IJobListener
 
     public async Task JobToBeExecuted(IJobExecutionContext context, CancellationToken cancellationToken = default)
     {
+        using IServiceScope scope = _serviceProvider.CreateScope();
+        ISender _sender = scope.ServiceProvider.GetService<ISender>() ?? throw new InvalidOperationException("ISender service not found.");
+        ILogger<JobListener> _logger = scope.ServiceProvider.GetService<ILogger<JobListener>>()!;
+        _logger.LogInformation("Job execution started {Time}",DateTime.UtcNow.ToLongDateString());
+
         try
         {
-            using IServiceScope scope = _serviceProvider.CreateScope();
-            _sender = scope.ServiceProvider.GetService<ISender>() ?? throw new InvalidOperationException("ISender service not found.");
-
+           
             JobId = Convert.ToInt64(context.JobDetail.Key.Group, CultureInfo.InvariantCulture);
             JobStepId = Convert.ToInt64(context.JobDetail.Key.Name, CultureInfo.InvariantCulture);
             bool jobInstanceCreated = context.MergedJobDataMap.TryGetLong("JobInstanceId", out long _jobInstanceId);
             JobInstanceId = _jobInstanceId;
+
 
             if (!jobInstanceCreated)
             {
@@ -83,13 +92,20 @@ internal sealed class JobListener : IJobListener
                                      JobExecutionException? jobException,
                                      CancellationToken cancellationToken = default)
     {
+        
+        using IServiceScope scope = _serviceProvider.CreateScope();
+        ISender _sender = scope.ServiceProvider.GetService<ISender>() ?? throw new InvalidOperationException("ISender service not found.");
+        ILogger<JobListener> _logger = scope.ServiceProvider.GetService<ILogger<JobListener>>()!;
+
+        _logger.LogInformation("Job execution Completed {Time}", DateTime.UtcNow.ToLongDateString());
+
         if (jobException is not null)
-        { 
+        {
             await updateStatus(_sender,
                                JobInstanceId,
                                JobStepInstanceId,
                                Status.CompletedWithErrors,
-                               $"Job with Id {JobId} and Step Id {JobStepId} Completed With Errors {jobException.Message}");
+                               $"Job with Id {JobId} and Step Id {JobStepId} Completed With Errors  \nException Message:{jobException.Message}\n Exception StackTrace:{jobException.StackTrace}");
             return;
         }
         await updateStatus(_sender,

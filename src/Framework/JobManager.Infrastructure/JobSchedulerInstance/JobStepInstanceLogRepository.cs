@@ -29,14 +29,6 @@ internal sealed class JobStepInstanceLogRepository : IJobStepInstanceLogReposito
             @Active
         )";
 
-        var parameters = new
-        {
-            jobStepInstanceLog.JobStepInstanceId,
-            jobStepInstanceLog.Log,
-            jobStepInstanceLog.CreatedTime,
-            jobStepInstanceLog.Active
-        };
-
-        await connection.QueryAsync(query, parameters);
+        await connection.QueryAsync(query, jobStepInstanceLog);
     }
 }

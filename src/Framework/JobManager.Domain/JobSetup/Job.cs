@@ -9,8 +9,7 @@ public class Job : Entity
     }
     private Job(string? description,
                 DateTime effectiveDateTime,
-                JobType jobType
-                )
+                string jobType)
     {
         EffectiveDateTime = effectiveDateTime;
         Description = description;
@@ -19,17 +18,15 @@ public class Job : Entity
 
     public DateTime EffectiveDateTime { get; private set; }
     public string? Description { get; private set; }
-    public JobType Type { get; private set; }
+    public string Type { get; private set; }
     public string CronExpression { get; private set; }
     public RecurringDetail? RecurringDetail { get; private set; }
     public List<JobStep> JobSteps { get; private set; } = new();
 
     public static Job Create(string? description,
                              DateTime effectiveDateTime,
-                             JobType jobType)
-    {
-        return new Job(description, effectiveDateTime, jobType);
-    }
+                             string jobType) => 
+        new Job(description, effectiveDateTime, jobType);
 
     public void SetRecurringDetail(RecurringDetail? recurringDetail)
     {
@@ -45,12 +42,9 @@ public class Job : Entity
     public void RemoveJobStep(JobStep jobStep)
     {
         ArgumentNullException.ThrowIfNull(jobStep);
-
         JobSteps.Remove(jobStep);
     }
 
-    public void SetCronExpression(string v)
-    {
-        throw new NotImplementedException();
-    }
+    public void SetCronExpression(string cronExpression) => CronExpression = cronExpression;
+
 }

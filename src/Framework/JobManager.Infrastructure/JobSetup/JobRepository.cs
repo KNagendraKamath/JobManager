@@ -37,15 +37,7 @@ internal sealed class JobRepository : IJobRepository
                               )
                               RETURNING id;";
 
-            job.Id = await connection.QueryFirstOrDefaultAsync<long>(sql, new
-            {
-                job.Description,
-                job.EffectiveDateTime,
-                job.Type,
-                job.CreatedTime,
-                job.Active,
-                job.CronExpression
-            });
+            job.Id = await connection.QueryFirstOrDefaultAsync<long>(sql, job);
 
             const string jobStepSql = @"
                                           INSERT INTO JOB.job_step(
@@ -58,20 +50,15 @@ internal sealed class JobRepository : IJobRepository
                                           VALUES (
                                               @JobId,
                                               @JobConfigId,
-                                              @Parameter,
+                                              @JsonParameter,
                                               @CreatedTime,
                                               @Active
                                           );";
             foreach (JobStep jobStep in job.JobSteps)
             {
-                await connection.ExecuteAsync(jobStepSql, new
-                {
-                    JobId = job.Id,
-                    jobStep.JobConfigId,
-                    Parameter=jobStep.JsonParameter,
-                    jobStep.CreatedTime,
-                    jobStep.Active
-                });
+                DynamicParameters jobStepParameters = new DynamicParameters(jobStep);
+                jobStepParameters.Add("JobId", job.Id);
+                await connection.ExecuteAsync(jobStepSql, jobStepParameters);
             }
 
 
@@ -83,7 +70,7 @@ internal sealed class JobRepository : IJobRepository
                                               recurring_type,
                                               second,
                                               minute,
-                                              hours,
+                                              hour,
                                               day_of_week,
                                               day,
                                               created_time,
@@ -101,9 +88,9 @@ internal sealed class JobRepository : IJobRepository
                                               @Active
                                           );";
 
-                DynamicParameters parameters = new DynamicParameters(job.RecurringDetail);
-                parameters.Add("JobId", job.Id);
-                await connection.ExecuteAsync(recurringSql, parameters);
+                DynamicParameters recurringDetailParameters = new DynamicParameters(job.RecurringDetail);
+                recurringDetailParameters.Add("JobId", job.Id);
+                await connection.ExecuteAsync(recurringSql, recurringDetailParameters);
             }
             transaction.Commit();
             return job.Id;

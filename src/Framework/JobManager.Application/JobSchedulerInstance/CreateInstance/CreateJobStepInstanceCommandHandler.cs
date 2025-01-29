@@ -12,7 +12,7 @@ internal sealed class CreateJobStepInstanceCommandHandler : ICommandHandler<Crea
 
     public async Task<Result<long>> Handle(CreateJobStepInstanceCommand request, CancellationToken cancellationToken)
     {
-        JobStepInstance jobStepInstance = JobStepInstance.Create(request.JobInstanceId, request.JobStepId, Status.NotStarted);
+        JobStepInstance jobStepInstance = JobStepInstance.Create(request.JobInstanceId, request.JobStepId, Status.NotStarted.ToString());
         await _jobStepInstanceRepository.AddAsync(jobStepInstance);
         return jobStepInstance.Id;
     }

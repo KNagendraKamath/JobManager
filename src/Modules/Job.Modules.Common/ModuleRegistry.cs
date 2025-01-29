@@ -14,7 +14,7 @@ public static class Class1
 
         services.AddDDVJobs();
         services.AddTestJob();
-        services.AddScoped<IJobAssemblyProvider, JobAssemblyProvider>();
+       
         return services;
     }
 

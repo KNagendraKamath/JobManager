@@ -1,4 +1,4 @@
-﻿namespace JobManager.Framework.Domain.JobSchedulerInstance;
+﻿namespace JobManager.Framework.Application.JobSchedulerInstance;
 
 public enum Status
 {

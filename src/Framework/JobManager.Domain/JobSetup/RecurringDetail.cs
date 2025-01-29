@@ -6,11 +6,11 @@ public class RecurringDetail:Entity
 {
     public Job Job { get; private set; }
     public long JobId {  get; private set; }
-    public RecurringType RecurringType { get; private set; }
+    public string RecurringType { get; private set; }
     public int Second { get; private set; }
     public int Minute { get; private set; }
     public int Hour { get; private set; }
-    public DayOfWeek DayOfWeek { get;private set; }
+    public string DayOfWeek { get;private set; }
     public int Day { get; private set; }
 
     public RecurringDetail()
@@ -18,7 +18,13 @@ public class RecurringDetail:Entity
 
     }
 
-    public RecurringDetail(Job job,RecurringType recurringType, int second, int minute, int hour, DayOfWeek dayOfWeek, int day)
+    public RecurringDetail(Job job,
+                           string recurringType,
+                           int second,
+                           int minute,
+                           int hour,
+                           string dayOfWeek,
+                           int day)
     {
         Job = job;
         JobId = job.Id;

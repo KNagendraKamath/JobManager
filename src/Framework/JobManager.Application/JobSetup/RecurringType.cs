@@ -1,4 +1,4 @@
-﻿namespace JobManager.Framework.Domain.JobSetup;
+﻿namespace JobManager.Framework.Application.JobSetup;
 
 public enum RecurringType
 {

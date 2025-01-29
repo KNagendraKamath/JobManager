@@ -7,7 +7,7 @@ public class JobInstance:Entity
 {
     private JobInstance() { }
 
-    private JobInstance(long jobId,Status status)
+    private JobInstance(long jobId,string status)
     {
         JobId = jobId;
         Status = status;
@@ -16,10 +16,10 @@ public class JobInstance:Entity
 
     public long JobId {  get; private set; }
     public Job Job { get; private set; }
-    public Status Status { get; private set; }
+    public string Status { get; private set; }
     public List<JobStepInstance> JobStepInstances { get; private set; }=new();
 
-    public static JobInstance Create(long jobId, Status status) => new JobInstance(jobId, status);
+    public static JobInstance Create(long jobId, string status) => new JobInstance(jobId, status);
 
     public void AddJobStepInstance(JobStepInstance jobStepInstance)
     {
@@ -33,5 +33,5 @@ public class JobInstance:Entity
         JobStepInstances.Remove(jobStepInstance);
     }
 
-    public void UpdateStatus(Status status) => Status = status;
+    public void UpdateStatus(string status) => Status = status;
 }

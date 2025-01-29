@@ -1,6 +1,5 @@
 ﻿using System.Text.Json.Serialization;
 using JobManager.Framework.Application.Abstractions.Messaging;
-using JobManager.Framework.Domain.JobSetup;
 
 namespace JobManager.Framework.Application.JobSetup.ScheduleJob;
 

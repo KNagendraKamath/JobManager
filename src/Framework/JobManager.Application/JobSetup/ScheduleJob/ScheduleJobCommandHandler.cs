@@ -1,3 +1,4 @@
+using System.Globalization;
 using JobManager.Framework.Application.Abstractions.Messaging;
 using JobManager.Framework.Domain.Abstractions;
 using JobManager.Framework.Domain.JobSetup;
@@ -23,19 +24,19 @@ internal sealed class ScheduleJobCommandHandler : ICommandHandler<ScheduleJobCom
     {
         Job job = Job.Create(request.Description,
                              request.EffectiveDateTime,
-                             request.JobType);
+                             request.JobType.ToString());
 
         if (request.JobType == JobType.Recurring && request.RecurringDetail is not null)
         {
             job.SetRecurringDetail(new Domain.JobSetup.RecurringDetail(job,
-                                                                      request.RecurringDetail.RecurringType,
+                                                                      request.RecurringDetail.RecurringType.ToString(),
                                                                       request.RecurringDetail.Second,
                                                                       request.RecurringDetail.Minute,
                                                                       request.RecurringDetail.Hour,
-                                                                      request.RecurringDetail.DayOfWeek,
+                                                                      request.RecurringDetail.DayOfWeek.ToString(),
                                                                       request.RecurringDetail.Day));
 
-            job.SetCronExpression(_cronExpressionGenerator.Generate(request.RecurringDetail.RecurringType,
+            job.SetCronExpression(_cronExpressionGenerator.Generate(Convert.ToString(request.RecurringDetail.RecurringType,CultureInfo.InvariantCulture),
                                                                       request.RecurringDetail.Second,
                                                                       request.RecurringDetail.Minute,
                                                                       request.RecurringDetail.Hour,

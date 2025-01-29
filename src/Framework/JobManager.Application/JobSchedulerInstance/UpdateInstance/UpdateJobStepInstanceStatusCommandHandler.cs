@@ -15,10 +15,10 @@ internal sealed class UpdateJobStepInstanceStatusCommandHandler : ICommandHandle
         JobStepInstance jobStepInstance = (await _jobStepInstanceRepository.GetByIdAsync(request.JobStepInstanceId, cancellationToken))!;
 
         if (request.Status == Status.Running)
-            jobStepInstance.SetStartTime(request.Time);
+            jobStepInstance.SetStartTime(request.Time,request.Status.ToString());
 
-        if (request.Status == Status.Completed)
-            jobStepInstance.SetEndTime(request.Time);
+        if (request.Status == Status.Completed || request.Status == Status.CompletedWithErrors)
+            jobStepInstance.SetEndTime(request.Time,request.Status.ToString());
 
         await _jobStepInstanceRepository.UpdateAsync(jobStepInstance);
 

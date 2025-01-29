@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Framework\JobManager.Presentation.Api\JobManager.Framework.Presentation.Api.csproj" />
+    <ProjectReference Include="..\..\Modules\Job.Modules.Common\Job.Modules.Common.csproj" />
   </ItemGroup>
 
 </Project>

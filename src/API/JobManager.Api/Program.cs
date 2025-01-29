@@ -1,6 +1,7 @@
 using System.Text.Json.Serialization;
 using JobManager.Api;
 using JobManager.Api.Middleware;
+using JobManager.Framework.Infrastructure.Scheduler;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -15,7 +16,9 @@ builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
 });
 
+builder.Services.AddHostedService<JobSchedulerService>();
 builder.Services.AddDependencies(builder.Configuration);
+
 
 WebApplication app = builder.Build();
 

@@ -36,18 +36,9 @@ internal sealed class JobStepInstanceRepository : IJobStepInstanceRepository
         )
         RETURNING id;";
 
-        var parameters = new
-        {
-            jobStepInstance.JobInstanceId,
-            jobStepInstance.JobStepId,
-            jobStepInstance.Status,
-            jobStepInstance.StartTime,
-            jobStepInstance.EndTime,
-            jobStepInstance.CreatedTime,
-            jobStepInstance.Active
-        };
+     
 
-        jobStepInstance.Id = await connection.QuerySingleAsync<long>(query, parameters);
+        jobStepInstance.Id = await connection.QuerySingleAsync<long>(query, jobStepInstance);
         return jobStepInstance;
     }
 
@@ -92,17 +83,7 @@ internal sealed class JobStepInstanceRepository : IJobStepInstanceRepository
             WHERE 
                 id = @Id";
 
-        int affectedRows = await connection.ExecuteAsync(query, new
-        {
-            jobStepInstance.JobInstanceId,
-            jobStepInstance.JobStepId,
-            jobStepInstance.Status,
-            jobStepInstance.StartTime,
-            jobStepInstance.EndTime,
-            UpdatedTime = DateTime.UtcNow,
-            jobStepInstance.Active,
-            jobStepInstance.Id
-        });
+        int affectedRows = await connection.ExecuteAsync(query, jobStepInstance);
 
         return affectedRows > 0;
     }

@@ -31,13 +31,8 @@ internal sealed class JobInstanceRepository : IJobInstanceRepository
             )
             RETURNING id;";
 
-        jobInstance.Id = await connection.QueryFirstOrDefaultAsync<long>(sql, new
-        {
-            jobInstance.JobId,
-            jobInstance.Status,
-            jobInstance.CreatedTime,
-            jobInstance.Active
-        });
+
+        jobInstance.Id = await connection.QueryFirstOrDefaultAsync<long>(sql, jobInstance);
     }
 
     public async Task UpdateAsync(JobInstance jobInstance)
@@ -52,14 +47,7 @@ internal sealed class JobInstanceRepository : IJobInstanceRepository
                 active = @Active
             WHERE id = @Id;";
 
-        await connection.ExecuteAsync(sql, new
-        {
-            jobInstance.JobId,
-            jobInstance.Status,
-            jobInstance.UpdatedTime,
-            jobInstance.Active,
-            jobInstance.Id
-        });
+        await connection.ExecuteAsync(sql, jobInstance);
     }
 
     public async Task<JobInstance?> GetByIdAsync(long jobInstanceId, CancellationToken cancellationToken=default)

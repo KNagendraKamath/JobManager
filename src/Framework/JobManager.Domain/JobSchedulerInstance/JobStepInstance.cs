@@ -7,7 +7,7 @@ public class JobStepInstance:Entity
 {
     private JobStepInstance() { }
 
-    private JobStepInstance(long jobInstanceId, long jobStepId, Status stepInstanceStatus)
+    private JobStepInstance(long jobInstanceId, long jobStepId, string stepInstanceStatus)
     {
         JobInstanceId = jobInstanceId;
         JobStepId = jobStepId;
@@ -20,26 +20,26 @@ public class JobStepInstance:Entity
     public long JobStepId { get; private set; }
     public JobStep JobStep {  get; private set; }
 
-    public Status Status {  get;private set; }
+    public string Status {  get;private set; }
     public DateTimeOffset? StartTime { get; private set; }
     public DateTimeOffset? EndTime { get; private set; }
     public List<JobStepInstanceLog> JobStepInstanceLogs { get; private set; } = new();
 
-    public static JobStepInstance Create(long jobInstanceId, long jobStepId, Status stepInstanceStatus) =>
+    public static JobStepInstance Create(long jobInstanceId, long jobStepId, string stepInstanceStatus) =>
         new JobStepInstance(jobInstanceId, jobStepId, stepInstanceStatus);
 
-    public void UpdateStatus(Status status) => Status = status;
+    public void UpdateStatus(string status) => Status = status;
 
-    public void SetEndTime(DateTimeOffset endTime)
+    public void SetEndTime(DateTimeOffset endTime,string status)
     {
         EndTime = endTime;
-        Status = Status.Completed; 
+        Status = status;
     }
 
-    public void SetStartTime(DateTimeOffset startTime)
+    public void SetStartTime(DateTimeOffset startTime,string status)
     {
         StartTime = startTime;
-        Status = Status.Running;
+        Status = status;
     }
 
     public void AddLog(string log)

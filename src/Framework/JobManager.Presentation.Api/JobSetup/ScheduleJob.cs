@@ -1,7 +1,7 @@
 ﻿using System.Text.Json.Serialization;
+using JobManager.Framework.Application.JobSetup;
 using JobManager.Framework.Application.JobSetup.ScheduleJob;
 using JobManager.Framework.Domain.Abstractions;
-using JobManager.Framework.Domain.JobSetup;
 using JobManager.Framework.Presentation.Api.ApiResults;
 using MediatR;
 using RecurringDetail = JobManager.Framework.Application.JobSetup.ScheduleJob.RecurringDetail;

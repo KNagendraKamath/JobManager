@@ -11,18 +11,18 @@ using Quartz.Impl.Matchers;
 using Quartz.Listener;
 using Exceptions = JobManager.Framework.Application.Abstractions.Exceptions;
 
-namespace JobManager.Framework.Infrastructure.JobSchedulerInstance.Scheduler.Quartz;
+namespace JobManager.Framework.Infrastructure.Scheduler.Quartz;
 
-internal sealed class Scheduler : IJobScheduler
+internal sealed class QuartzJobScheduler : IJobScheduler
 {
     private readonly IScheduler _scheduler;
 
-    private readonly ILogger<Scheduler> _logger;
+    private readonly ILogger<QuartzJobScheduler> _logger;
     private ISender _sender;
     private IJobAssemblyProvider _jobAssemblyProvider;
 
-    public Scheduler(ISchedulerFactory schedulerFactory,
-                     ILogger<Scheduler> logger)
+    public QuartzJobScheduler(ISchedulerFactory schedulerFactory,
+                     ILogger<QuartzJobScheduler> logger)
     {
         _logger = logger;
         _scheduler = schedulerFactory.GetScheduler().Result;
