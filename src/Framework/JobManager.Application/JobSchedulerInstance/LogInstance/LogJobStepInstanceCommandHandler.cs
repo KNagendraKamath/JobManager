@@ -5,17 +5,15 @@ using JobManager.Framework.Domain.JobSchedulerInstance;
 namespace JobManager.Framework.Application.JobSchedulerInstance.LogInstance;
 internal sealed class LogJobStepInstanceCommandHandler : ICommandHandler<LogJobStepInstanceCommand>
 {
-    private readonly IJobStepInstanceRepository _jobStepInstanceRepository;
+    private readonly IJobStepInstanceLogRepository _jobStepInstanceLogRepository;
 
-
-    public LogJobStepInstanceCommandHandler(IJobStepInstanceRepository jobStepInstanceRepository) =>
-        _jobStepInstanceRepository = jobStepInstanceRepository;
+    public LogJobStepInstanceCommandHandler(IJobStepInstanceLogRepository jobStepInstanceLogRepository) =>
+        _jobStepInstanceLogRepository = jobStepInstanceLogRepository;
 
     public async Task<Result> Handle(LogJobStepInstanceCommand request, CancellationToken cancellationToken)
     {
-        JobStepInstance jobStepInstance = await _jobStepInstanceRepository.GetByIdAsync(request.JobStepInstanceId, cancellationToken);
-        jobStepInstance!.AddLog(request.Message);
-        await _jobStepInstanceRepository.UpdateAsync(jobStepInstance);
+        JobStepInstanceLog jobStepInstanceLog = JobStepInstanceLog.Create(request.JobStepInstanceId, request.Message);
+        await _jobStepInstanceLogRepository.AddAsync(jobStepInstanceLog);
         return Result.Success();
     }
 }

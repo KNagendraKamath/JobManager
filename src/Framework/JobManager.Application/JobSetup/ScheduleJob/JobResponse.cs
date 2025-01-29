@@ -1,7 +1,6 @@
-﻿
-using JobManager.Framework.Domain.JobSetup;
+﻿using JobManager.Framework.Domain.JobSetup;
 
-namespace JobManager.Framework.Application.JobSetup.GetJobDetail;
+namespace JobManager.Framework.Application.JobSetup.ScheduleJob;
 public sealed class JobResponse
 {
     public long JobId { get; init; }
@@ -16,7 +15,7 @@ public sealed class JobResponse
     public int? Hour { get; init; }
     public DayOfWeek? DayOfWeek { get; init; }
     public int? Day { get; init; }
-    public List<JobStepResponse> Steps { get; init; }=new();
+    public List<JobStepResponse> Steps { get; init; } = new();
 }
 
 public sealed class JobStepResponse

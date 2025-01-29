@@ -1,19 +1,14 @@
 ﻿using JobManager.Framework.Application.Abstractions.Messaging;
 using JobManager.Framework.Domain.Abstractions;
-using JobManager.Framework.Domain.JobSchedulerInstance;
 using JobManager.Framework.Domain.JobSetup;
 
 namespace JobManager.Framework.Application.JobSetup.CreateJob;
 internal sealed class UnscheduleCommandHandler : ICommandHandler<UnscheduleJobCommand>
 {
     private readonly IJobRepository _jobRepository;
-    private readonly IJobScheduler _jobScheduler;
 
-    public UnscheduleCommandHandler(IJobRepository jobRepository, IJobScheduler jobScheduler)
-    {
+    public UnscheduleCommandHandler(IJobRepository jobRepository) => 
         _jobRepository = jobRepository;
-        _jobScheduler = jobScheduler;
-    }
 
     public async Task<Result> Handle(UnscheduleJobCommand request, CancellationToken cancellationToken)
     {
@@ -27,8 +22,6 @@ internal sealed class UnscheduleCommandHandler : ICommandHandler<UnscheduleJobCo
         if (jobStepIds.Any()) return Result.Failure(Error.NotFound("NotFound", $"Job step {request.JobName} in Job with Id: {request.JobId} not found"));
 
         DeactivateJobSteps(job, jobStepIds);
-
-        await _jobScheduler.UnSchedule(request.JobId, jobStepIds);
 
         return Result.Success();
     }

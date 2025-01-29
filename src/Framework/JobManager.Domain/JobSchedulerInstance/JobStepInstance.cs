@@ -21,7 +21,7 @@ public class JobStepInstance:Entity
     public JobStep JobStep {  get; private set; }
 
     public Status Status {  get;private set; }
-    public DateTimeOffset StartTime { get; private set; }
+    public DateTimeOffset? StartTime { get; private set; }
     public DateTimeOffset? EndTime { get; private set; }
     public List<JobStepInstanceLog> JobStepInstanceLogs { get; private set; } = new();
 
@@ -44,7 +44,7 @@ public class JobStepInstance:Entity
 
     public void AddLog(string log)
     {
-        JobStepInstanceLog logEntry = new JobStepInstanceLog(this.Id, log);
+        JobStepInstanceLog logEntry = JobStepInstanceLog.Create(this.Id, log);
         JobStepInstanceLogs.Add(logEntry);
     }
 }

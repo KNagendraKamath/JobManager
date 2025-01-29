@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS job."recurring_detail" (
     "recurring_type" Varchar(50) NOT NULL,
     "second" INTEGER NOT NULL,
     "minute" INTEGER NOT NULL,
-    "hours" INTEGER NOT NULL,
+    "hour" INTEGER NOT NULL,
     "day_of_week" INTEGER NOT NULL,
     "day" INTEGER NOT NULL
 );
@@ -74,7 +74,7 @@ CREATE TABLE IF NOT EXISTS job."job_step_instance" (
     "job_instance_id" BIGINT NOT NULL REFERENCES job."job_instance"("id"),
     "job_step_id" BIGINT NOT NULL REFERENCES job."job_step"("id"),
     "status" Varchar(50) NOT NULL,
-    "start_time" TIMESTAMPTZ NOT NULL,
+    "start_time" TIMESTAMPTZ,
     "end_time" TIMESTAMPTZ
 );
 

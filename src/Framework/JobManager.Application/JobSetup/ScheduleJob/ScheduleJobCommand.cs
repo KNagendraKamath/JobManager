@@ -20,7 +20,7 @@ public record RecurringDetail
 
     public int Second { get; set; }
     public int Minute { get; set; }
-    public int Hours { get; set; }
+    public int Hour { get; set; }
 
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public DayOfWeek DayOfWeek { get; set; }
@@ -37,7 +37,7 @@ public record RecurringDetail
         RecurringType = recurringType;
         Second = second ?? 0;
         Minute = minute ?? 0;
-        Hours = hour ?? 0;
+        Hour = hour ?? 0;
         Day = day ?? 1;
         DayOfWeek = dayOfWeek ?? DayOfWeek.Sunday;
     }

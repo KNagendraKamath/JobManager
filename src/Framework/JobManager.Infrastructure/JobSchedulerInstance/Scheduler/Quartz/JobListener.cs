@@ -5,48 +5,78 @@ using JobManager.Framework.Application.JobSchedulerInstance.UpdateInstance;
 using JobManager.Framework.Domain.Abstractions;
 using JobManager.Framework.Domain.JobSchedulerInstance;
 using MediatR;
+using Microsoft.Extensions.DependencyInjection;
 using Quartz;
+using Exceptions = JobManager.Framework.Application.Abstractions.Exceptions;
 
 namespace JobManager.Framework.Infrastructure.JobSchedulerInstance.Scheduler.Quartz;
 
 internal sealed class JobListener : IJobListener
 {
-    public JobListener(ISender sender)
-    {
-        _sender = sender;
-    }
-    private readonly ISender _sender;
+    private readonly IServiceProvider _serviceProvider;
+    private ISender _sender;
     private long JobId { get; set; }
     private long JobStepId { get; set; }
     private long JobInstanceId { get; set; }
     private long JobStepInstanceId { get; set; }
 
+    public JobListener(IServiceProvider serviceProvider) => _serviceProvider = serviceProvider;
+
     public string Name => "JobListener";
+
+    readonly Func<ISender, long, long, Status,string, Task> updateStatus = static async (_sender, instanceId, stepInstanceId,status, logMessage) =>
+    {
+        try
+        {
+            await _sender.Send(new UpdateJobStepInstanceStatusCommand(stepInstanceId, status, DateTime.UtcNow));
+            await _sender.Send(new UpdateJobInstanceStatusCommand(instanceId, status));
+            await _sender.Send(new LogJobStepInstanceCommand(stepInstanceId, logMessage));
+        }
+        catch (Exception ex)
+        {
+            string exceptionDetails = Exceptions.ValidationException.GetExceptionDetails(ex);
+            throw new Exception($"An error occurred: {exceptionDetails}");
+        }
+    };
 
     public Task JobExecutionVetoed(IJobExecutionContext context, CancellationToken cancellationToken = default)
     {
-        
         throw new NotImplementedException();
     }
 
     public async Task JobToBeExecuted(IJobExecutionContext context, CancellationToken cancellationToken = default)
     {
-        JobId = Convert.ToInt64(context.JobDetail.Key.Group,CultureInfo.InvariantCulture);
-        JobStepId = Convert.ToInt64(context.JobDetail.Key.Name, CultureInfo.InvariantCulture);
-        bool jobInstanceCreated=context.MergedJobDataMap.TryGetLong("JobInstanceId", out long _jobInstanceId);
-        JobInstanceId = _jobInstanceId;
-
-        if (!jobInstanceCreated)
+        try
         {
-            Result<long> jobInstanceResult = await _sender.Send(new CreateJobInstanceCommand(JobId), cancellationToken);
-            JobInstanceId = jobInstanceResult.Value;
-            context.MergedJobDataMap.Put("JobInstanceId", JobInstanceId);
-        }
-        
-        Result<long> jobStepInstanceResult = await _sender.Send(new CreateJobStepInstanceCommand(JobInstanceId, JobStepId), cancellationToken);
+            using IServiceScope scope = _serviceProvider.CreateScope();
+            _sender = scope.ServiceProvider.GetService<ISender>() ?? throw new InvalidOperationException("ISender service not found.");
 
-        JobStepInstanceId = jobStepInstanceResult.Value;
-        await UpdateInstanceStatus(JobInstanceId, JobStepInstanceId, Status.Running);
+            JobId = Convert.ToInt64(context.JobDetail.Key.Group, CultureInfo.InvariantCulture);
+            JobStepId = Convert.ToInt64(context.JobDetail.Key.Name, CultureInfo.InvariantCulture);
+            bool jobInstanceCreated = context.MergedJobDataMap.TryGetLong("JobInstanceId", out long _jobInstanceId);
+            JobInstanceId = _jobInstanceId;
+
+            if (!jobInstanceCreated)
+            {
+                Result<long> jobInstanceResult = await _sender.Send(new CreateJobInstanceCommand(JobId), cancellationToken);
+                JobInstanceId = jobInstanceResult.Value;
+                context.MergedJobDataMap.Put("JobInstanceId", JobInstanceId);
+            }
+
+            Result<long> jobStepInstanceResult = await _sender.Send(new CreateJobStepInstanceCommand(JobInstanceId, JobStepId), cancellationToken);
+            JobStepInstanceId = jobStepInstanceResult.Value;
+
+            await updateStatus(_sender,
+                               JobInstanceId,
+                               JobStepInstanceId,
+                               Status.Running,
+                               $"Job with Id {JobId} and Step Id {JobStepId} started");
+        }
+        catch (Exception ex)
+        {
+            string exceptionDetails = Exceptions.ValidationException.GetExceptionDetails(ex);
+            throw new Exception($"An error occurred: {exceptionDetails}");
+        }
     }
 
     public async Task JobWasExecuted(IJobExecutionContext context,
@@ -54,26 +84,18 @@ internal sealed class JobListener : IJobListener
                                      CancellationToken cancellationToken = default)
     {
         if (jobException is not null)
-        {
-            await UpdateInstanceStatus(JobInstanceId, JobStepInstanceId, Status.CompletedWithErrors);
-            await _sender.Send(new LogJobStepInstanceCommand(JobStepInstanceId, jobException.Message), cancellationToken);
+        { 
+            await updateStatus(_sender,
+                               JobInstanceId,
+                               JobStepInstanceId,
+                               Status.CompletedWithErrors,
+                               $"Job with Id {JobId} and Step Id {JobStepId} Completed With Errors {jobException.Message}");
             return;
         }
-        await UpdateJobStepInstanceStatus(JobStepInstanceId, Status.Completed);
+        await updateStatus(_sender,
+                           JobInstanceId,
+                           JobStepInstanceId,
+                           Status.Completed,
+                           $"Job with Id {JobId} and Step Id {JobStepId} Completed");
     }
-
-    private async Task UpdateInstanceStatus(long jobInstanceId,
-                                            long jobStepInstanceId,
-                                            Status status)
-    {
-        await UpdateJobStepInstanceStatus(jobStepInstanceId, status);
-        await UpdateJobInstanceStatus(jobInstanceId, status);
-    }
-
-    private async Task UpdateJobInstanceStatus(long jobInstanceId, Status status) =>
-        await _sender.Send(new UpdateJobInstanceStatusCommand(jobInstanceId, status));
-
-    private async Task UpdateJobStepInstanceStatus(long jobStepInstanceId, Status status) =>
-        await _sender.Send(new UpdateJobStepInstanceStatusCommand(jobStepInstanceId, status, DateTimeOffset.Now));
-
 }

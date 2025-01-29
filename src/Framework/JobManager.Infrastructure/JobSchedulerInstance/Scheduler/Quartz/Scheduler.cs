@@ -1,7 +1,7 @@
-﻿using System.Threading;
-using JobManager.Framework.Application.JobSetup.GetJobDetail;
+﻿using System.Globalization;
+using JobManager.Framework.Application.JobSetup.ScheduleJob;
+using JobManager.Framework.Application.JobSetup.UnscheduleJob;
 using JobManager.Framework.Domain.Abstractions;
-using JobManager.Framework.Domain.JobSchedulerInstance;
 using JobManager.Framework.Domain.JobSetup;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,40 +9,54 @@ using Microsoft.Extensions.Logging;
 using Quartz;
 using Quartz.Impl.Matchers;
 using Quartz.Listener;
+using Exceptions = JobManager.Framework.Application.Abstractions.Exceptions;
 
 namespace JobManager.Framework.Infrastructure.JobSchedulerInstance.Scheduler.Quartz;
 
 internal sealed class Scheduler : IJobScheduler
 {
     private readonly IScheduler _scheduler;
-    private readonly IServiceProvider _serviceProvider;
-    private readonly IJobAssemblyProvider _jobAssemblyProvider;
+
     private readonly ILogger<Scheduler> _logger;
+    private ISender _sender;
+    private IJobAssemblyProvider _jobAssemblyProvider;
 
     public Scheduler(ISchedulerFactory schedulerFactory,
-                     IJobAssemblyProvider jobAssemblyProvider,
-                     ILogger<Scheduler> logger,
-                     IServiceProvider serviceProvider
-                    )
+                     ILogger<Scheduler> logger)
     {
-        _jobAssemblyProvider = jobAssemblyProvider;
-        _serviceProvider = serviceProvider;
         _logger = logger;
         _scheduler = schedulerFactory.GetScheduler().Result;
+
     }
 
-    public async Task ExecuteAsync(CancellationToken cancellationToken=default)
+    public async Task ExecuteAsync(IServiceScope scope, CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("Fetching any new jobs to be scheduled");
+        try
+        {
+            _sender = scope.ServiceProvider.GetRequiredService<ISender>();
+            _jobAssemblyProvider = scope.ServiceProvider.GetRequiredService<IJobAssemblyProvider>();
 
-        IReadOnlyCollection<JobKey> jobKeys = await _scheduler.GetJobKeys(GroupMatcher<JobKey>.AnyGroup(), cancellationToken);
-        string alreadyScheduledJobIds = string.Join(",", jobKeys.Select(j => j.Group));
+            _logger.LogInformation("Fetching any new jobs to be scheduled");
 
-        using IServiceScope scope = _serviceProvider.CreateScope();
-        Result<IReadOnlyList<JobResponse>> jobsToBeScheduled = await scope.ServiceProvider
-                                                                 .GetRequiredService<ISender>()
-                                                                 .Send(new GetPendingOneTimeAndRecurringJobQuery(alreadyScheduledJobIds),
-                                                                       cancellationToken);
+            IReadOnlyCollection<JobKey> jobKeys = await _scheduler.GetJobKeys(GroupMatcher<JobKey>.AnyGroup(), cancellationToken);
+            long[] alreadyScheduledJobIds = jobKeys.Select(j => Convert.ToInt64(j.Group, CultureInfo.InvariantCulture)).ToArray();
+
+            await UnscheduleJobAsync(alreadyScheduledJobIds, cancellationToken);
+            await ScheduleJobAsync(alreadyScheduledJobIds, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            string exceptionDetails = Exceptions.ValidationException.GetExceptionDetails(ex);
+            _logger.LogError(ex, "An error occurred: {ExceptionDetails}", exceptionDetails);
+        }
+
+    }
+
+    private async Task ScheduleJobAsync(long[] alreadyScheduledJobIds,
+                                    CancellationToken cancellationToken)
+    {
+        Result<IReadOnlyList<JobResponse>> jobsToBeScheduled = await _sender.Send(new GetPendingOneTimeAndRecurringJobQuery(alreadyScheduledJobIds),
+                                                                               cancellationToken);
 
         if (jobsToBeScheduled.IsFailure)
         {
@@ -55,9 +69,28 @@ internal sealed class Scheduler : IJobScheduler
             List<IJobDetail> jobDetails = CreateJobDetails(jobResponse);
             ConfigureJobChainListener(jobResponse.JobId, jobDetails);
             TriggerBuilder triggerBuilder = GenerateTrigger(jobResponse);
+            if (await _scheduler.CheckExists(jobDetails[0].Key, cancellationToken))
+            {
+                _logger.LogInformation("Job {JobId} is already scheduled. Skipping...", jobResponse.JobId);
+                continue;
+            }
             await _scheduler.ScheduleJob(jobDetails[0], triggerBuilder.Build(), cancellationToken);
         }
-        _logger.LogInformation("New jobs scheduled");
+    }
+
+    private async Task UnscheduleJobAsync(long[] alreadyScheduledJobIds,
+                                      CancellationToken cancellationToken)
+    {
+        Result<IReadOnlyList<JobGroups>> jobsToBeUnscheduled = await _sender.Send(new GetJobsToUnscheduleQuery(alreadyScheduledJobIds),
+                                                                      cancellationToken);
+
+        if (jobsToBeUnscheduled.IsFailure)
+        {
+            _logger.LogError("Failed to retrieve jobs to be scheduled: {ErrorDescription}", jobsToBeUnscheduled.Error.Description);
+            return;
+        }
+
+        await UnSchedule(jobsToBeUnscheduled.Value);
     }
 
     private void ConfigureJobChainListener(long JobId, List<IJobDetail> jobDetails)
@@ -85,7 +118,10 @@ internal sealed class Scheduler : IJobScheduler
             Type jobAssembly = Type.GetType(jobAssemblyName);
 
             if (jobAssembly is null)
-                throw new InvalidProgramException($"Job assembly {jobAssemblyName} not found");
+            {
+                _logger.LogError("Job assembly {JobAssemblyName} not found", jobAssemblyName);
+                return;
+            }
 
             jobDetails.Add(JobBuilder.Create(jobAssembly)
                                        .WithIdentity($"{step.JobStepId}", $"{jobResponse.JobId}")
@@ -108,12 +144,11 @@ internal sealed class Scheduler : IJobScheduler
         return triggerBuilder;
     }
 
-
-    public async Task UnSchedule(long GroupId, List<long> StepId)
+    public async Task UnSchedule(IReadOnlyList<JobGroups> jobGroups)
     {
-        if (StepId.Any())
+        if (jobGroups.Any())
         {
-            JobKey[] jobsToDelete = StepId.Select(stepId => new JobKey($"{stepId}", $"{GroupId}")).ToArray();
+            JobKey[] jobsToDelete = jobGroups.Select(job => new JobKey($"{job.JobStepId}", $"{job.JobId}")).ToArray();
             await _scheduler.DeleteJobs(jobsToDelete);
         }
     }

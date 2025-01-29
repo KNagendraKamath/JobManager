@@ -31,5 +31,9 @@ app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 Endpoints.MapEndpoints(app);
 
-await app.RunAsync();
+app.Run();
+
+[System.Diagnostics.CodeAnalysis.SuppressMessage("Maintainability", "CA1515:Consider making public types internal", Justification = "Used for Unit Testing")]
+[System.Diagnostics.CodeAnalysis.SuppressMessage("Major Code Smell", "S1118:Utility classes should not have public constructors", Justification = "Used for Unit Testing")]
+public partial class Program;
 

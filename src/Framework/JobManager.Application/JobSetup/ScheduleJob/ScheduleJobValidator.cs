@@ -18,8 +18,6 @@ internal sealed class ScheduleJobValidator : AbstractValidator<ScheduleJobComman
 
         RuleForEach(x => x.JobSteps)
             .MustAsync(async (step, cancellationToken) => await jobConfigValidation.IsValidJobConfig(step.JobName, cancellationToken));
-            
-            
 
         RuleFor(x => x.RecurringDetail)
            .NotEmpty()
@@ -52,7 +50,7 @@ internal sealed class RecurringDetailValidator : AbstractValidator<RecurringDeta
     {
         RuleFor(recurringDetail => recurringDetail!.Second).InclusiveBetween(0, MaxTimeUnit);
         RuleFor(recurringDetail => recurringDetail!.Minute).InclusiveBetween(0, MaxTimeUnit);
-        RuleFor(recurringDetail => recurringDetail!.Hours).InclusiveBetween(0, MaxHourLimit);
+        RuleFor(recurringDetail => recurringDetail!.Hour).InclusiveBetween(0, MaxHourLimit);
         RuleFor(recurringDetail => recurringDetail!.Day).InclusiveBetween(MinDayLimit, MaxDayLimit);
     }
 }

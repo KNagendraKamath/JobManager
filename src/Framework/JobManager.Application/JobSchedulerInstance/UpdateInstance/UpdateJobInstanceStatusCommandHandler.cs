@@ -15,6 +15,7 @@ internal sealed class UpdateJobInstanceStatusCommandHandler : ICommandHandler<Up
     {
         JobInstance jobInstance = await _jobInstanceRepository.GetByIdAsync(request.JobInstanceId, cancellationToken);
         jobInstance!.UpdateStatus(request.Status);
+        await _jobInstanceRepository.UpdateAsync(jobInstance);
         return Result.Success();
     }
 }

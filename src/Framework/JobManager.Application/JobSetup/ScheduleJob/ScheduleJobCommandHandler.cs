@@ -31,14 +31,14 @@ internal sealed class ScheduleJobCommandHandler : ICommandHandler<ScheduleJobCom
                                                                       request.RecurringDetail.RecurringType,
                                                                       request.RecurringDetail.Second,
                                                                       request.RecurringDetail.Minute,
-                                                                      request.RecurringDetail.Hours,
+                                                                      request.RecurringDetail.Hour,
                                                                       request.RecurringDetail.DayOfWeek,
                                                                       request.RecurringDetail.Day));
 
             job.SetCronExpression(_cronExpressionGenerator.Generate(request.RecurringDetail.RecurringType,
                                                                       request.RecurringDetail.Second,
                                                                       request.RecurringDetail.Minute,
-                                                                      request.RecurringDetail.Hours,
+                                                                      request.RecurringDetail.Hour,
                                                                       request.RecurringDetail.Day,
                                                                       request.RecurringDetail.DayOfWeek
                                                                      ));
@@ -46,8 +46,7 @@ internal sealed class ScheduleJobCommandHandler : ICommandHandler<ScheduleJobCom
 
         }
 
-        string jobConfigNamesInCSV = $"'{string.Join("','", request.JobSteps.Select(x => x.JobName))}'";
-        IEnumerable<JobConfig> jobConfigs = await _jobConfigRepository.GetJobConfigByNamesAsync(jobConfigNamesInCSV, cancellationToken);
+        IEnumerable<JobConfig> jobConfigs = await _jobConfigRepository.GetJobConfigByNamesAsync(request.JobSteps.Select(x => x.JobName).ToArray(), cancellationToken);
         request.JobSteps.ForEach(step =>
            job.AddJobStep(new JobStep(job,
                                       jobConfigs.First(x => x.Name.Equals(step.JobName, StringComparison.Ordinal)),

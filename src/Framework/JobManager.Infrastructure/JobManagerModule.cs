@@ -5,6 +5,7 @@ using JobManager.Framework.Domain.JobSchedulerInstance;
 using JobManager.Framework.Domain.JobSetup;
 using JobManager.Framework.Infrastructure.Abstractions;
 using JobManager.Framework.Infrastructure.JobSchedulerInstance;
+using JobManager.Framework.Infrastructure.JobSchedulerInstance.Scheduler;
 using JobManager.Framework.Infrastructure.JobSchedulerInstance.Scheduler.Quartz;
 using JobManager.Framework.Infrastructure.JobSetup;
 using Microsoft.Extensions.Configuration;
@@ -16,8 +17,6 @@ namespace JobManager.Framework.Infrastructure;
 
 public static class JobManagerModule
 {
-
-
     public static IServiceCollection AddInfrastructure(
         this IServiceCollection services,
         IConfiguration configuration)
@@ -33,8 +32,7 @@ public static class JobManagerModule
     {
         services.AddQuartz(q=> q.AddJobListener<JobListener>(GroupMatcher<JobKey>.AnyGroup()));
         services.AddQuartzHostedService(options => options.WaitForJobsToComplete = true); 
-        services.AddSingleton<IJobScheduler,Scheduler>();
-
+        services.AddScoped<IJobScheduler,Scheduler>();
     }
 
     private static void AddRepository(IServiceCollection services, IConfiguration configuration)

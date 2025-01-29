@@ -25,31 +25,50 @@ internal sealed class JobConfigRepository :  IJobConfigRepository
                              @CreatedTime,
                              true
                             )
-                            ON CONFLICT (Name) DO UPDATE SET
-                            Updated_Time = EXCLUDED.Created_Time,
-                            Active = EXCLUDED.Active;";
+                            ON CONFLICT (Name) DO NOTHING";
 
         await connection.ExecuteAsync(sql, jobConfigs);
-
     }
 
     public async Task<JobConfig> GetJobConfigAsync(string name, CancellationToken cancellationToken = default)
     {
         using IDbConnection connection = _sqlConnectionFactory.CreateConnection();
 
-        string query = "SELECT * FROM JOB.job_config WHERE Name = @Name";
+        const string query = @"SELECT id Id,
+                                      name Name,
+                                      created_time CreatedTime,
+                                      updated_time UpdatedTime,     
+                                      active Active
+                               FROM JOB.job_config 
+                               WHERE Name = @Name";
+
         return await connection.QueryFirstOrDefaultAsync<JobConfig>(new(query,
                                                                         new { Name = name },
                                                                         cancellationToken:cancellationToken));
     }
 
-    public async Task<IEnumerable<JobConfig>> GetJobConfigByNamesAsync(string namesInCSV, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<JobConfig>> GetJobConfigByNamesAsync(string[] jobNames, CancellationToken cancellationToken = default)
     {
-        using IDbConnection connection = _sqlConnectionFactory.CreateConnection();
+        try
+        {
+            using IDbConnection connection = _sqlConnectionFactory.CreateConnection();
 
-        string query = "SELECT * FROM JOB.job_config WHERE Name in (@NamesInCSV)";
-        return (await connection.QueryAsync<JobConfig>(new(query,
-                                                           new { NamesInCSV = namesInCSV },
-                                                           cancellationToken:cancellationToken)));
+            const string query = @"SELECT id ""Id"",
+                                      name ""Name"",
+                                      created_time ""CreatedTime"",
+                                      updated_time ""UpdatedTime"",     
+                                      active ""Active""
+                               FROM JOB.job_config 
+                               WHERE Name = ANY(@NamesInCSV)";
+
+
+            IEnumerable<JobConfig> result = await connection.QueryAsync<JobConfig>(query,
+                                                               new { NamesInCSV = jobNames });
+            return result;
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException(ex.Message);
+        }
     }
 }

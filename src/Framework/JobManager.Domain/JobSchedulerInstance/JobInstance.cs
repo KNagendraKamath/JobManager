@@ -17,7 +17,7 @@ public class JobInstance:Entity
     public long JobId {  get; private set; }
     public Job Job { get; private set; }
     public Status Status { get; private set; }
-    public List<JobStepInstance> JobStepInstances { get; private set; }
+    public List<JobStepInstance> JobStepInstances { get; private set; }=new();
 
     public static JobInstance Create(long jobId, Status status) => new JobInstance(jobId, status);
 

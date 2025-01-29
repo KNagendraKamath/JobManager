@@ -7,7 +7,7 @@ public class JobStepInstanceLog:Entity
 {
     private JobStepInstanceLog() { }
 
-    public JobStepInstanceLog(long jobStepInstanceId, string log)
+    private JobStepInstanceLog(long jobStepInstanceId, string log)
     {
         JobStepInstanceId = jobStepInstanceId;
         Log = log;
@@ -17,4 +17,7 @@ public class JobStepInstanceLog:Entity
     public JobStepInstance JobStepInstance { get; set; }
 
     public string Log { get; set; }
+
+    public static JobStepInstanceLog Create(long jobStepInstanceId, string log) =>
+        new JobStepInstanceLog(jobStepInstanceId,log);
 }

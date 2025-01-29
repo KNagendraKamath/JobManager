@@ -9,83 +9,110 @@ internal sealed class JobRepository : IJobRepository
 {
     private readonly ISqlConnectionFactory _sqlConnectionFactory;
 
-    public JobRepository(ISqlConnectionFactory sqlConnectionFactory) => 
-        _sqlConnectionFactory = sqlConnectionFactory;
+    public JobRepository(ISqlConnectionFactory sqlConnectionFactory)=> _sqlConnectionFactory = sqlConnectionFactory;
 
     public async Task<long> AddAsync(Job job)
     {
         using IDbConnection connection = _sqlConnectionFactory.CreateConnection();
+        using IDbTransaction transaction = connection.BeginTransaction();
 
-        const string sql = @"
-            INSERT INTO JOB.job(
-                description, 
-                effective_date_time, 
-                type, 
-                created_time,  
-                active,
-                cron_expression
-            )
-            VALUES (
-                @Description, 
-                @EffectiveDateTime, 
-                @Type, 
-                @CreatedTime, 
-                @Active,
-                @CronExpression
-            )
-            RETURNING id;";
-
-        job.Id = await connection.QueryFirstOrDefaultAsync<long>(sql, new
+        try
         {
-            job.Description,
-            job.EffectiveDateTime,
-            job.Type,
-            job.CreatedTime,
-            job.Active,
-            job.CronExpression
-        });
+            const string sql = @"
+                              INSERT INTO JOB.job(
+                                  description, 
+                                  effective_date_time, 
+                                  type, 
+                                  created_time,  
+                                  active,
+                                  cron_expression
+                              )
+                              VALUES (
+                                  @Description, 
+                                  @EffectiveDateTime, 
+                                  @Type, 
+                                  @CreatedTime, 
+                                  @Active,
+                                  @CronExpression
+                              )
+                              RETURNING id;";
 
-        if (job.RecurringDetail != null)
-        {
-            const string recurringSql = @"
-                INSERT INTO JOB.recurring_detail(
-                    job_id,
-                    recurring_type,
-                    second,
-                    minute,
-                    hours,
-                    day_of_week,
-                    day,
-                    created_time,
-                    active
-                )
-                VALUES (
-                    @JobId,
-                    @RecurringType,
-                    @Second,
-                    @Minute,
-                    @Hours,
-                    @DayOfWeek,
-                    @Day,
-                    @CreatedTime,
-                    @Active
-                );";
-
-            await connection.ExecuteAsync(recurringSql, new
+            job.Id = await connection.QueryFirstOrDefaultAsync<long>(sql, new
             {
-                JobId = job.Id,
-                job.RecurringDetail.RecurringType,
-                job.RecurringDetail.Second,
-                job.RecurringDetail.Minute,
-                job.RecurringDetail.Hours,
-                job.RecurringDetail.DayOfWeek,
-                job.RecurringDetail.Day,
+                job.Description,
+                job.EffectiveDateTime,
+                job.Type,
                 job.CreatedTime,
-                job.Active
+                job.Active,
+                job.CronExpression
             });
-        }
 
-        return job.Id;
+            const string jobStepSql = @"
+                                          INSERT INTO JOB.job_step(
+                                              job_id,
+                                              job_config_id,
+                                              parameter,
+                                              created_time,
+                                              active
+                                          )
+                                          VALUES (
+                                              @JobId,
+                                              @JobConfigId,
+                                              @Parameter,
+                                              @CreatedTime,
+                                              @Active
+                                          );";
+            foreach (JobStep jobStep in job.JobSteps)
+            {
+                await connection.ExecuteAsync(jobStepSql, new
+                {
+                    JobId = job.Id,
+                    jobStep.JobConfigId,
+                    Parameter=jobStep.JsonParameter,
+                    jobStep.CreatedTime,
+                    jobStep.Active
+                });
+            }
+
+
+            if (job.RecurringDetail != null)
+            {
+                const string recurringSql = @"
+                                          INSERT INTO JOB.recurring_detail(
+                                              job_id,
+                                              recurring_type,
+                                              second,
+                                              minute,
+                                              hours,
+                                              day_of_week,
+                                              day,
+                                              created_time,
+                                              active
+                                          )
+                                          VALUES (
+                                              @JobId,
+                                              @RecurringType,
+                                              @Second,
+                                              @Minute,
+                                              @Hour,
+                                              @DayOfWeek,
+                                              @Day,
+                                              @CreatedTime,
+                                              @Active
+                                          );";
+
+                DynamicParameters parameters = new DynamicParameters(job.RecurringDetail);
+                parameters.Add("JobId", job.Id);
+                await connection.ExecuteAsync(recurringSql, parameters);
+            }
+            transaction.Commit();
+            return job.Id;
+        }
+        catch
+        {
+            transaction.Rollback();
+            throw;
+        }
     }
 
     public async Task DeactivateJobAsync(long jobId, CancellationToken cancellationToken = default)
@@ -93,11 +120,11 @@ internal sealed class JobRepository : IJobRepository
         using IDbConnection connection = _sqlConnectionFactory.CreateConnection();
 
         const string sql = @"
-            UPDATE JOB.job
-            SET 
-                active = 0,
-                updated_time = @UpdatedTime
-            WHERE id = @Id;";
+                              UPDATE JOB.job
+                              SET 
+                                  active = 0,
+                                  updated_time = @UpdatedTime
+                              WHERE id = @Id;";
 
         await connection.ExecuteAsync(sql, new
         {
@@ -111,38 +138,54 @@ internal sealed class JobRepository : IJobRepository
         using IDbConnection connection = _sqlConnectionFactory.CreateConnection();
 
         const string sql = @"
-           SELECT  job.id, 
-                   description, 
-                   effective_date_time, 
-                   type, 
-                   active,
-                   recurring_detail.id as RecurringDetailId,
-                   recurring_type, 
-                   second, 
-                   minute, 
-                   hours, 
-                   day_of_week, 
-                   day
-            FROM JOB.job job
-            LEFT JOIN JOB.recurring_detail recurring_detail
-                ON job.id = recurring_detail.job_id
-            WHERE job.id = @Id;";
+                         SELECT  job.id ""Id"", 
+                                 job.description ""Description"", 
+                                 job.effective_date_time ""EffectiveDateTime"", 
+                                 job.type ""Type"", 
+                                 job.active ""Active"",
+                                 recurring_detail.id as ""RecurringDetailId"",
+                                 recurring_detail.recurring_type ""RecurringType"", 
+                                 recurring_detail.second ""Second"", 
+                                 recurring_detail.minute ""Minute"", 
+                                 recurring_detail.hour ""Hour"", 
+                                 recurring_detail.day_of_week ""DayOfWeek"", 
+                                 recurring_detail.day ""Day"",
+                                 job_step.id as ""JobStepId"",
+                                 job_step.job_config_id as ""JobConfigId"",
+                                 job_step.parameter as ""JsonParameter"",
+                                 job_step.created_time as ""CreatedTime"",
+                                 job_step.active as ""StepActive""
+                          FROM JOB.job job
+                          LEFT JOIN JOB.recurring_detail recurring_detail
+                              ON job.id = recurring_detail.job_id
+                          LEFT JOIN JOB.job_step job_step
+                              ON job.id = job_step.job_id
+                          WHERE job.id = @Id;";
 
-        IEnumerable<Job> result = await connection.QueryAsync<Job, RecurringDetail, Job>(
-                                                    sql,
-                                                    (job, recurringDetail) =>
-                                                    {
-                                                        if (recurringDetail is not null)
-                                                            job.SetRecurringDetail(recurringDetail);
+        Dictionary<long, Job> jobDictionary = new Dictionary<long, Job>();
 
-                                                        return job;
-                                                    },
-                                                    new
-                                                    {
-                                                        Id= id
-                                                    },
-                                                    splitOn: "RecurringDetailId"
-                                );
+        IEnumerable<Job> result = await connection.QueryAsync<Job, RecurringDetail, JobStep, Job>(
+            sql,
+            (job, recurringDetail, jobStep) =>
+            {
+                if (!jobDictionary.TryGetValue(job.Id, out Job? currentJob))
+                {
+                    currentJob = job;
+                    jobDictionary.Add(currentJob.Id, currentJob);
+                }
+
+                if (recurringDetail is not null)
+                    currentJob.SetRecurringDetail(recurringDetail);
+
+                if (jobStep is not null)
+                    currentJob.AddJobStep(jobStep);
+
+                return currentJob;
+            },
+            new { Id = id },
+            splitOn: "RecurringDetailId,JobStepId"
+        );
+
         return result.FirstOrDefault();
     }
 
@@ -151,28 +194,26 @@ internal sealed class JobRepository : IJobRepository
         using IDbConnection connection = _sqlConnectionFactory.CreateConnection();
 
         const string sql = @"
+                              SELECT job.id ""Id"", 
+                                     job.description ""Description"", 
+                                     job.effective_date_time ""EffectiveDateTime"", 
+                                     job.type ""Type"", 
+                                     job.cron_expression ""CronExpression"",
+                                     job.active ""Active"",
+                                     recurring_detail.id As ""RecurringDetailId"",
+                                     recurring_detail.recurring_type ""RecurringType"", 
+                                     recurring_detail.second ""Second"", 
+                                     recurring_detail.minute ""Minute"", 
+                                     recurring_detail.hour ""Hour"", 
+                                     recurring_detail.day_of_week ""DayOfWeek"", 
+                                     recurring_detail.day ""Day""
+                              FROM JOB.job job
+                                  LEFT JOIN JOB.recurring_detail recurring_detail
+                                      ON job.id = recurring_detail.job_id
+                              ORDER BY job.id
+                              OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY;";
 
-            SELECT job.id, 
-                   job.description, 
-                   job.effective_date_time, 
-                   job.type, 
-                   job.cron_expression,
-                   job.active,
-                   recurring_detail.id As RecurringDetailId,
-                   recurring_detail.recurring_type, 
-                   recurring_detail.second, 
-                   recurring_detail.minute, 
-                   recurring_detail.hours, 
-                   recurring_detail.day_of_week, 
-                   recurring_detail.day
-            FROM JOB.job job
-                LEFT JOIN JOB.recurring_detail recurring_detail
-                    ON job.id = JOB.recurring_detail.job_id
-            ORDER BY job.id
-            OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY;
-            ";
-
-        return await connection.QueryAsync<Job,RecurringDetail,Job>(
+        IEnumerable<Job> jobs= await connection.QueryAsync<Job, RecurringDetail, Job>(
                                                  sql,
                                                   (job, recurringDetail) =>
                                                   {
@@ -185,10 +226,30 @@ internal sealed class JobRepository : IJobRepository
                                                      Offset = (page - 1) * pageSize,
                                                      PageSize = pageSize
                                                  },
-                                                 splitOn: "RecurringDetailId"     
+                                                 splitOn: "RecurringDetailId"
                                                 );
+        if (jobs.Any())
+        {
+            const string jobStepSql = @"
+            SELECT job_step.id as ""JobStepId"",
+                   job_step.job_id as ""JobId"",
+                   job_step.job_config_id as ""JobConfigId"",
+                   job_step.parameter as ""JsonParameter"",
+                   job_step.created_time as ""CreatedTime"",
+                   job_step.active as ""StepActive""
+            FROM JOB.job_step job_step
+            WHERE job_step.job_id = ANY(@JobIds);";
 
+            IEnumerable<JobStep> jobSteps = await connection.QueryAsync<JobStep>(
+                jobStepSql,
+                new { JobIds = jobs.Select(x=>x.Id).ToArray() }
+                );
 
+            foreach(Job job in  jobs)
+               job.JobSteps.AddRange(jobSteps.Where(x => x.JobId == job.Id)); 
+        }
+
+        return jobs;
     }
 
     public async Task RemoveJobStep(long jobStepId, CancellationToken cancellationToken = default)
@@ -196,11 +257,11 @@ internal sealed class JobRepository : IJobRepository
         using IDbConnection connection = _sqlConnectionFactory.CreateConnection();
 
         const string sql = @"
-            UPDATE JOB.job_step
-            SET 
-                active = 0,
-                updated_time = @UpdatedTime
-            WHERE id = @Id;";
+                              UPDATE JOB.job_step
+                              SET 
+                                  active = 0,
+                                  updated_time = @UpdatedTime
+                              WHERE id = @Id;";
 
         await connection.ExecuteAsync(sql, new
         {
@@ -208,6 +269,4 @@ internal sealed class JobRepository : IJobRepository
             UpdatedTime = DateTime.UtcNow
         });
     }
-
-  
 }

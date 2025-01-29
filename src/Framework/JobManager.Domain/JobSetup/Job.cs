@@ -15,7 +15,6 @@ public class Job : Entity
         EffectiveDateTime = effectiveDateTime;
         Description = description;
         Type = jobType;
-        JobSteps = new();
     }
 
     public DateTime EffectiveDateTime { get; private set; }
@@ -23,7 +22,7 @@ public class Job : Entity
     public JobType Type { get; private set; }
     public string CronExpression { get; private set; }
     public RecurringDetail? RecurringDetail { get; private set; }
-    public List<JobStep> JobSteps { get; private set; }
+    public List<JobStep> JobSteps { get; private set; } = new();
 
     public static Job Create(string? description,
                              DateTime effectiveDateTime,

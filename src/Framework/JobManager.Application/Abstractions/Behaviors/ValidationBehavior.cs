@@ -19,22 +19,27 @@ public class ValidationBehavior<TRequest, TResponse>
         CancellationToken cancellationToken)
     {
         if (!_validators.Any()) return await next();
-        
 
         ValidationContext<TRequest> context = new ValidationContext<TRequest>(request);
 
-        List<ValidationError> validationErrors = _validators
-            .Select(validator => validator.Validate(context))
-            .Where(validationResult => validationResult.Errors.Any())
-            .SelectMany(validationResult => validationResult.Errors)
-            .Select(validationFailure => new ValidationError(
-                validationFailure.PropertyName,
-                validationFailure.ErrorMessage))
-            .ToList();
+        List<ValidationError> validationErrors = new List<ValidationError>();
+
+        foreach (IValidator<TRequest> validator in _validators)
+        {
+            FluentValidation.Results.ValidationResult validationResult = await validator.ValidateAsync(context, cancellationToken);
+            if (validationResult.Errors.Any())
+            {
+                validationErrors.AddRange(validationResult.Errors
+                                                          .Select(validationFailure => 
+                                                          new ValidationError(
+                                                                validationFailure.PropertyName,
+                                                                validationFailure.ErrorMessage)));
+            }
+        }
 
         if (validationErrors.Any())
             throw new Exceptions.ValidationException(validationErrors);
-        
+
         return await next();
     }
 }

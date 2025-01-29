@@ -67,7 +67,12 @@ internal sealed class JobInstanceRepository : IJobInstanceRepository
         using IDbConnection connection = _sqlConnectionFactory.CreateConnection();
 
         const string sql = @"
-            SELECT id, job_id, status, created_time, updated_time, active
+            SELECT id ""Id"",
+                   job_id ""JobId"",
+                   status ""Status"",
+                   created_time ""CreatedTime"",
+                   updated_time ""UpdatedTime"",
+                   active ""Active""
             FROM JOB.job_instance
             WHERE id = @Id;";
 

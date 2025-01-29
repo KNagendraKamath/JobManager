@@ -1,40 +1,49 @@
-using JobManager.Framework.Domain.JobSchedulerInstance;
 using JobManager.Framework.Domain.JobSetup;
+using JobManager.Framework.Infrastructure.JobSchedulerInstance.Scheduler;
 
 
 namespace JobRunner;
 
 internal sealed class Worker : BackgroundService
 {
-    private readonly IJobScheduler _scheduler;
-    private readonly IJobAssemblyProvider _assemblyProvider;
+    private IJobScheduler _scheduler;
+    private Timer _timer;
 
-    public Worker(IJobScheduler jobScheduler,
-                  IJobAssemblyProvider jobAssemblyProvider)
-    {
-        _scheduler = jobScheduler;
-        _assemblyProvider = jobAssemblyProvider;
-    }
+    private readonly IServiceProvider _serviceProvider;
+
+    public Worker(IServiceProvider serviceProvider) =>
+        _serviceProvider = serviceProvider;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        await _assemblyProvider.LoadJobsFromAssemblyAsync(stoppingToken);
-        StartPollingDatabase(stoppingToken);
+        using IServiceScope scope = _serviceProvider.CreateScope();
+        _scheduler = scope.ServiceProvider.GetRequiredService<IJobScheduler>();
 
-        while (!stoppingToken.IsCancellationRequested)
-            await Task.Delay(1000, stoppingToken);
+        IJobAssemblyProvider assemblyProvider = scope.ServiceProvider.GetRequiredService<IJobAssemblyProvider>();
+        await assemblyProvider.LoadJobsFromAssemblyAsync(stoppingToken);
+
+        StartPollingDatabase(stoppingToken);
     }
 
     private void StartPollingDatabase(CancellationToken cancellationToken)
     {
         TimeSpan pollingInterval = TimeSpan.FromMinutes(1); // Adjust as needed
-        using Timer timer = new(async _ => await _scheduler.ExecuteAsync(cancellationToken),
+        _timer = new Timer(async _ => await _scheduler.ExecuteAsync(_serviceProvider.CreateScope(),cancellationToken),
                                 null,
                                 TimeSpan.Zero,
                                 pollingInterval);
     }
 
-    public override async Task StopAsync(CancellationToken cancellationToken) =>
+    public override async Task StopAsync(CancellationToken cancellationToken)
+    {
+        _timer?.Change(Timeout.Infinite, 0);
         await base.StopAsync(cancellationToken);
+    }
+
+    public override void Dispose()
+    {
+        _timer?.Dispose();
+        base.Dispose();
+    }
 }
 

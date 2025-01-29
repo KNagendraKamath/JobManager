@@ -5,17 +5,15 @@ using JobManager.Framework.Domain.JobSchedulerInstance;
 namespace JobManager.Framework.Application.JobSchedulerInstance.CreateInstance;
 internal sealed class CreateJobStepInstanceCommandHandler : ICommandHandler<CreateJobStepInstanceCommand,long>
 {
-    private readonly IJobInstanceRepository _jobInstanceRepository;
+    private readonly IJobStepInstanceRepository _jobStepInstanceRepository;
 
-    public CreateJobStepInstanceCommandHandler(IJobInstanceRepository jobInstanceRepository) => 
-        _jobInstanceRepository = jobInstanceRepository;
+    public CreateJobStepInstanceCommandHandler(IJobStepInstanceRepository jobStepInstanceRepository) => 
+        _jobStepInstanceRepository = jobStepInstanceRepository;
 
     public async Task<Result<long>> Handle(CreateJobStepInstanceCommand request, CancellationToken cancellationToken)
     {
-        JobInstance jobInstance = await _jobInstanceRepository.GetByIdAsync(request.JobInstanceId, cancellationToken);
-        JobStepInstance jobStepInstance = JobStepInstance.Create(jobInstance!.Id, request.JobStepId, Status.NotStarted);
-        jobInstance.AddJobStepInstance(jobStepInstance);
-        await _jobInstanceRepository.UpdateAsync(jobInstance);
+        JobStepInstance jobStepInstance = JobStepInstance.Create(request.JobInstanceId, request.JobStepId, Status.NotStarted);
+        await _jobStepInstanceRepository.AddAsync(jobStepInstance);
         return jobStepInstance.Id;
     }
 }
